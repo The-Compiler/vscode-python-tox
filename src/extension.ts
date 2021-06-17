@@ -97,5 +97,5 @@ export function deactivate() {}
 // For testing, before we move this to a utils.ts
 export const _private = {
 	getToxEnvs,
-    runTox,
+	runTox,
 };
