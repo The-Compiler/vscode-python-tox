@@ -14,13 +14,13 @@ function findProjectDir() {
 	const workspace = vscode.workspace.getWorkspaceFolder(docUri);
 	if (workspace) {
 		const folder = workspace.uri.fsPath;
-		console.log(`tox workspace folder: ${folder}`)
+		console.log(`tox workspace folder: ${folder}`);
 		return folder;
 	}
 
 	const docPath = docUri.fsPath;
 	const docDir = path.dirname(docPath);
-	console.log(`tox doc path: ${docPath} -> ${docDir}`)
+	console.log(`tox doc path: ${docPath} -> ${docDir}`);
 	return docDir;
 }
 
