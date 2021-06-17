@@ -22,10 +22,11 @@ async function getToxEnvs() {
 	return stdout.split("\n");
 }
 
-function runTox(env: string) {
+function runTox(envs: string[]) {
 	const term = vscode.window.createTerminal("tox");
+	const envArg = envs.join(",")
 	term.show(true);  // preserve focus
-	term.sendText(`tox -e ${env}`);
+	term.sendText(`tox -e ${envArg}`);
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -37,9 +38,9 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage(error.message);
 			return;
 		}
-		const env = await vscode.window.showQuickPick(envs, {placeHolder: "tox environment"});
-		if (env) {
-			runTox(env);
+		const selectedEnvs = await vscode.window.showQuickPick(envs, {placeHolder: "tox environment", canPickMany: true});
+		if (selectedEnvs) {
+			runTox(selectedEnvs);
 		}
 	});
 
