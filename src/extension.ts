@@ -32,7 +32,7 @@ async function getToxEnvs() {
 
 async function safeGetToxEnvs() {
 	try {
-		return getToxEnvs();
+		return await getToxEnvs();
 	} catch (error) {
 		vscode.window.showErrorMessage(error.message);
 		return;
