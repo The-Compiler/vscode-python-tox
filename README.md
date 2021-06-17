@@ -23,6 +23,20 @@ the first time I'm writing something "real" using TypeScript and NodeJS.
 Contributions, suggestions and improvements of all kinds are very welcome,
 but use at your own risk.
 
+## Installing
+
+**This package isn't published to the VS Code Marketplace yet**, due to
+issues with registering an Azure Organization. This should be fixed soon-ish.
+
+In the meantime, you can:
+
+- Go to the [GitHub Actions tab](https://github.com/The-Compiler/vscode-python-tox/actions/workflows/ci.yml),
+  view the newest passing run and download an automated build from the "Artifacts" section.
+- Or clone the repository and run `npm run package`
+
+Then install the resulting `.vsix` file using the command palette and selecting
+"Extensions: Install from VSIX...".
+
 ## Extension Commands
 
 * `python-tox.select`: Show a menu allowing to pick a tox environment.
@@ -31,8 +45,3 @@ but use at your own risk.
 ## Release Notes
 
 See [CHANGELOG.md](CHANGELOG.md).
-
-**Note:** This package isn't published to the VS Code Marketplace yet, due to
-issues with registering an Azure Organization. This should be fixed soon-ish.
-In the meantime, clone the repository and run `npm run package` to get a
-`.vsix` file to install.
