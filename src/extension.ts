@@ -1,22 +1,46 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as child_process from 'child_process';
+import * as util from 'util';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+const exec = util.promisify(child_process.exec)
+
+async function getToxEnvs() {
+	const doc = vscode.window.activeTextEditor?.document.uri;
+	if (!doc) {
+		throw "No active window...";
+	}
+	const workspace = vscode.workspace.getWorkspaceFolder(doc);
+	if (!workspace) {
+		// FIXME use doc path?
+		throw "Workspace not found...";
+	}
+	const projdir = workspace.uri.fsPath;
+
+	const { stdout } = await exec('tox -l', {cwd: projdir});
+	return stdout.split("\n");
+}
+
+function runTox(env: string) {
+	const term = vscode.window.createTerminal("tox");
+	term.show(true);  // preserve focus
+	term.sendText(`tox -e ${env}`);
+}
+
 export function activate(context: vscode.ExtensionContext) {
-	
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "python-tox" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('python-tox.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello Mars from python-tox!');
+	let disposable = vscode.commands.registerCommand('python-tox.select', async () => {
+		let envs;
+		try {
+			envs = await getToxEnvs();
+		} catch (error) {
+			vscode.window.showErrorMessage(error.message);
+			return;
+		}
+		const env = await vscode.window.showQuickPick(envs, {placeHolder: "tox environment"});
+		if (env) {
+			runTox(env);
+		}
 	});
 
 	context.subscriptions.push(disposable);

@@ -10,14 +10,14 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:python-tox.helloWorld"
+        "onCommand:python-tox.select"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "python-tox.helloWorld",
-				"title": "Hello World"
+				"command": "python-tox.select",
+				"title": "Select and run tox environment"
 			}
 		]
 	},
