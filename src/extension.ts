@@ -19,8 +19,8 @@ function findProjectDir() {
 
 async function getToxEnvs() {
 	const projdir = findProjectDir();
-	const { stdout } = await exec('tox -l', {cwd: projdir});
-	return stdout.split("\n");
+	const { stdout } = await exec('tox -a', {cwd: projdir});
+	return stdout.trim().split("\n");
 }
 
 function runTox(envs: string[]) {
