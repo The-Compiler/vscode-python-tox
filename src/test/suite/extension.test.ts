@@ -26,12 +26,12 @@ suite('Extension Test Suite', () => {
 	test('getting tox environments', async () => {
 		const uri = getExampleDirUri("simple");
 		const envs = await extension._private.getToxEnvs(uri.fsPath);
-		assert.equal(envs, ["one", "two"]);
+		assert.deepEqual(envs, ["one", "two"]);
 	});
 
 	test('make sure we have all tox environments', async () => {
 		const uri = getExampleDirUri("allenvs");
 		const envs = await extension._private.getToxEnvs(uri.fsPath);
-		assert.equal(envs, ["one", "two", "three"]);
+		assert.deepEqual(envs, ["one", "two", "three"]);
 	});
 });
