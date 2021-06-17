@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import * as util from 'util';
 import * as path from 'path';
+import * as os from 'os';
 
 const exec = util.promisify(child_process.exec);
 
@@ -26,7 +27,7 @@ function findProjectDir() {
 
 async function getToxEnvs(projDir: string) {
 	const { stdout } = await exec('tox -a', {cwd: projDir});
-	return stdout.trim().split("\n");
+	return stdout.trim().split(os.EOL);
 }
 
 async function safeGetToxEnvs(projDir: string) {
