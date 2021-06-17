@@ -19,6 +19,12 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '14'
+    - name: Install Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install tox
+      run: pip install tox
     - run: npm install
     - run: xvfb-run -a npm test
       if: runner.os == 'Linux'
