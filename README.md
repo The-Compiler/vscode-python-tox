@@ -13,7 +13,7 @@
 
 This extension integrates the [tox](https://tox.readthedocs.io/) task automation tool with Visual Studio Code.
 
-<!-- TODO: screenshot -->
+![Screenshot](.github/img/quickpick.png)
 
 ## Here be dragons
 
