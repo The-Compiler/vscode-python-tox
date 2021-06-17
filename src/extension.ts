@@ -19,28 +19,27 @@ function findProjectDir() {
 	}
 
 	const docPath = docUri.fsPath;
-	console.log(`tox doc path: ${docPath}`)
-	return path.dirname(docPath)
+	const docDir = path.dirname(docPath);
+	console.log(`tox doc path: ${docPath} -> ${docDir}`)
+	return docDir;
 }
 
-async function getToxEnvs() {
-	const projdir = findProjectDir();
-	console.log(`tox project directory: ${projdir}`)
-	const { stdout } = await exec('tox -a', {cwd: projdir});
+async function getToxEnvs(projDir: string) {
+	const { stdout } = await exec('tox -a', {cwd: projDir});
 	return stdout.trim().split("\n");
 }
 
-async function safeGetToxEnvs() {
+async function safeGetToxEnvs(projDir: string) {
 	try {
-		return await getToxEnvs();
+		return await getToxEnvs(projDir);
 	} catch (error) {
 		vscode.window.showErrorMessage(error.message);
 		return;
 	}
 }
 
-function runTox(envs: string[]) {
-	const term = vscode.window.createTerminal("tox");
+function runTox(envs: string[], projDir: string) {
+	const term = vscode.window.createTerminal({"cwd": projDir, "name": "tox"});
 	const envArg = envs.join(",");
 	term.show(true);  // preserve focus
 
@@ -60,7 +59,8 @@ function runTox(envs: string[]) {
 }
 
 async function selectCommand() {
-	const envs = await safeGetToxEnvs();
+	const projDir = findProjectDir();
+	const envs = await safeGetToxEnvs(projDir);
 	if (!envs) {
 		return;
 	}
@@ -68,11 +68,12 @@ async function selectCommand() {
 	if (!selected) {
 		return;
 	}
-	runTox([selected]);
+	runTox([selected], projDir);
 }
 
 async function selectMultipleCommand() {
-	const envs = await safeGetToxEnvs();
+	const projDir = findProjectDir();
+	const envs = await safeGetToxEnvs(projDir);
 	if (!envs) {
 		return;
 	}
@@ -80,7 +81,7 @@ async function selectMultipleCommand() {
 	if (!selected) {
 		return;
 	}
-	runTox(selected);
+	runTox(selected, projDir);
 }
 
 export function activate(context: vscode.ExtensionContext) {
