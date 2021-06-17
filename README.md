@@ -26,6 +26,7 @@ but use at your own risk.
 ## Extension Commands
 
 * `python-tox.select`: Show a menu allowing to pick a tox environment.
+* `python-tox.selectMultiple`: Show a menu allowing to pick multiple tox environments.
 
 ## Release Notes
 

@@ -10,7 +10,8 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:python-tox.select"
+        "onCommand:python-tox.select",
+        "onCommand:python-tox.selectMultiple"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -18,6 +19,10 @@
 			{
 				"command": "python-tox.select",
 				"title": "Select and run tox environment"
+			},
+			{
+				"command": "python-tox.selectMultiple",
+				"title": "Select and run multiple tox environments"
 			}
 		]
 	},

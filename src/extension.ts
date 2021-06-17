@@ -23,6 +23,15 @@ async function getToxEnvs() {
 	return stdout.trim().split("\n");
 }
 
+async function safeGetToxEnvs() {
+	try {
+		return getToxEnvs();
+	} catch (error) {
+		vscode.window.showErrorMessage(error.message);
+		return;
+	}
+}
+
 function runTox(envs: string[]) {
 	const term = vscode.window.createTerminal("tox");
 	const envArg = envs.join(",")
@@ -44,22 +53,33 @@ function runTox(envs: string[]) {
 }
 
 async function selectCommand() {
-	let envs;
-	try {
-		envs = await getToxEnvs();
-	} catch (error) {
-		vscode.window.showErrorMessage(error.message);
+	const envs = await safeGetToxEnvs();
+	if (!envs) {
 		return;
 	}
-	const selectedEnvs = await vscode.window.showQuickPick(envs, {placeHolder: "tox environment", canPickMany: true});
-	if (selectedEnvs) {
-		runTox(selectedEnvs);
+	const selected = await vscode.window.showQuickPick(envs, {placeHolder: "tox environment"});
+	if (!selected) {
+		return;
 	}
+	runTox([selected]);
+}
+
+async function selectMultipleCommand() {
+	const envs = await safeGetToxEnvs();
+	if (!envs) {
+		return;
+	}
+	const selected = await vscode.window.showQuickPick(envs, {placeHolder: "tox environments", canPickMany: true});
+	if (!selected) {
+		return;
+	}
+	runTox(selected);
 }
 
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
-		vscode.commands.registerCommand('python-tox.select', selectCommand)
+		vscode.commands.registerCommand('python-tox.select', selectCommand),
+		vscode.commands.registerCommand('python-tox.selectMultiple', selectMultipleCommand)
 	);
 }
 
