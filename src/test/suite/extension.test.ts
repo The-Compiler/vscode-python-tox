@@ -33,7 +33,7 @@ async function waitForTerminal() {
 async function waitForMarker(dir: string) {
     return new Promise<void>(resolve => {
         fs.watch(dir, (eventType: string, filename: string) => {
-            if (eventType === "rename" && filename === "tox-did-run") {
+            if (filename === "tox-did-run") {
                 resolve();
             }
         });
