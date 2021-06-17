@@ -4,6 +4,11 @@
 	"description": "",
 	"version": "0.0.1",
     "license": "MIT",
+    "publisher": "the-compiler",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/The-Compiler/vscode-python-tox.git"
+    },
 	"engines": {
 		"vscode": "^1.57.0"
 	},
@@ -33,7 +38,9 @@
 		"watch": "tsc -watch -p ./",
 		"pretest": "npm run compile && npm run lint",
 		"lint": "eslint src --ext ts",
-		"test": "node ./out/test/runTest.js"
+		"test": "node ./out/test/runTest.js",
+        "package": "vsce package",
+        "publish": "vsce publish"
 	},
 	"devDependencies": {
 		"@types/vscode": "^1.57.0",

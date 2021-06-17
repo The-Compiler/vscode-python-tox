@@ -30,4 +30,9 @@ but use at your own risk.
 
 ## Release Notes
 
-See [CHANGELOG.md](CHANGELOG.md)
+See [CHANGELOG.md](CHANGELOG.md).
+
+**Note:** This package isn't published to the VS Code Marketplace yet, due to
+issues with registering an Azure Organization. This should be fixed soon-ish.
+In the meantime, clone the repository and run `npm run package` to get a
+`.vsix` file to install.
