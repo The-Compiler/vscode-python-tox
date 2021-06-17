@@ -1,24 +1,31 @@
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import * as util from 'util';
+import * as path from 'path';
 
 const exec = util.promisify(child_process.exec);
 
 function findProjectDir() {
-	const doc = vscode.window.activeTextEditor?.document.uri;
-	if (!doc) {
-		throw new Error("No active window...");
+	const docUri = vscode.window.activeTextEditor?.document.uri;
+	if (!docUri) {
+		throw new Error("No active editor found.");
 	}
-	const workspace = vscode.workspace.getWorkspaceFolder(doc);
-	if (!workspace) {
-		// FIXME use doc path?
-		throw new Error("Workspace not found...");
+
+	const workspace = vscode.workspace.getWorkspaceFolder(docUri);
+	if (workspace) {
+		const folder = workspace.uri.fsPath;
+		console.log(`tox workspace folder: ${folder}`)
+		return folder;
 	}
-	return workspace.uri.fsPath;
+
+	const docPath = docUri.fsPath;
+	console.log(`tox doc path: ${docPath}`)
+	return path.dirname(docPath)
 }
 
 async function getToxEnvs() {
 	const projdir = findProjectDir();
+	console.log(`tox project directory: ${projdir}`)
 	const { stdout } = await exec('tox -a', {cwd: projdir});
 	return stdout.trim().split("\n");
 }
