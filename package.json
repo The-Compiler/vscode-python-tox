@@ -2,9 +2,12 @@
   "name": "python-tox",
   "displayName": "python-tox",
   "description": "Integrates the tox task automation tool",
-  "keywords": ["python", "tox"],
+  "keywords": [
+    "python",
+    "tox"
+  ],
   "preview": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "publisher": "the-compiler",
   "repository": {
@@ -30,7 +33,11 @@
   "engines": {
     "vscode": "^1.57.0"
   },
-  "categories": ["Programming Languages", "Linters", "Other"],
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Other"
+  ],
   "activationEvents": [
     "onCommand:python-tox.select",
     "onCommand:python-tox.selectMultiple"
