@@ -1,15 +1,28 @@
+# python-tox extension for Visual Studio Code
+
 <a href="https://tox.readthedocs.io">
     <img src="https://raw.githubusercontent.com/tox-dev/tox/master/docs/_static/img/tox.png"
          alt="tox logo"
-         height="150px"
-         align="right">
+         height="100px"
+         align="right",
+         style="padding-left: 30px">
     <img src="https://media.githubusercontent.com/media/microsoft/vscode-docs/main/images/logo-stable.png"
          alt="VS Code logo"
-         height="150px"
+         height="100px"
          align="right">
 </a>
 
-# python-tox extension for Visual Studio Code
+
+[![VS Marketplace Version](https://vsmarketplacebadge.apphb.com/version/the-compiler.python-tox.svg)](https://marketplace.visualstudio.com/items?itemName=the-compiler.python-tox)
+[![VS Marketplace Installs](https://vsmarketplacebadge.apphb.com/installs/the-compiler.python-tox.svg)](https://marketplace.visualstudio.com/items?itemName=the-compiler.python-tox)
+[![VS Marketplace Ratings](https://vsmarketplacebadge.apphb.com/rating/the-compiler.python-tox.svg)](https://marketplace.visualstudio.com/items?itemName=the-compiler.python-tox)
+
+[![Open VSX Version](https://img.shields.io/open-vsx/v/the-compiler/python-tox?color=blue)](https://open-vsx.org/extension/the-compiler/python-tox)
+[![Open VSX Downloads](https://img.shields.io/open-vsx/dt/the-compiler/python-tox?color=blue)](https://open-vsx.org/extension/the-compiler/python-tox)
+[![Open VSX Ratings](https://img.shields.io/open-vsx/rating/the-compiler/python-tox?color=blue)](https://open-vsx.org/extension/the-compiler/python-tox)
+
+[![CI](https://img.shields.io/github/workflow/status/The-Compiler/vscode-python-tox/CI)](https://github.com/The-Compiler/vscode-python-tox/actions/workflows/ci.yml)
+[![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=pink)](https://github.com/sponsors/The-Compiler/)
 
 This extension integrates the [tox](https://tox.readthedocs.io/) task automation tool with Visual Studio Code.
 
@@ -25,10 +38,37 @@ but use at your own risk.
 
 ## Installing
 
-**This package isn't published to the VS Code Marketplace yet**, due to
-issues with registering an Azure Organization. This should be fixed soon-ish.
+Install the extension via the [Visual Studio
+Marketplace](https://marketplace.visualstudio.com/items?itemName=the-compiler.python-tox)
+or the [Open VSX
+Registry](https://open-vsx.org/extension/the-compiler/python-tox). Also, make
+sure that [tox](https://github.com/tox-dev/tox) is installed.
 
-In the meantime, you can:
+Finally, run one of the [commands](#extension-commands) via the command palette
+or bind them to a shortcut. No default shortcuts are provided.
+
+For [VSpaceCode](https://vspacecode.github.io/), consider a configuration such as:
+
+```jsonc
+    "vspacecode.bindingOverrides": [
+        {
+            "keys": ["m", "languageId:python", "c", "t"],
+            "name": "+Run tox",
+            "icon": "play",
+            "type": "command",
+            "command": "python-tox.select"
+        },
+        {
+            "keys": ["m", "languageId:python", "c", "T"],
+            "name": "+Run tox (multiple)",
+            "icon": "run-all",
+            "type": "command",
+            "command": "python-tox.selectMultiple"
+        },
+    ]
+```
+
+To get a development build of the latest commit, you can:
 
 - Go to the [GitHub Actions tab](https://github.com/The-Compiler/vscode-python-tox/actions/workflows/ci.yml),
   view the newest passing run and download an automated build from the "Artifacts" section.

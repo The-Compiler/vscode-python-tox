@@ -1,7 +1,9 @@
 {
   "name": "python-tox",
   "displayName": "python-tox",
-  "description": "",
+  "description": "Integrates the tox task automation tool",
+  "keywords": ["python", "tox"],
+  "preview": true,
   "version": "0.0.1",
   "license": "MIT",
   "publisher": "the-compiler",
@@ -9,12 +11,26 @@
     "type": "git",
     "url": "https://github.com/The-Compiler/vscode-python-tox.git"
   },
+  "bugs": {
+    "url": "https://github.com/The-Compiler/vscode-python-tox/issues",
+    "email": "visualstudio.com@the-compiler.org"
+  },
+  "badges": [
+    {
+      "url": "https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=pink",
+      "href": "https://github.com/sponsors/The-Compiler/",
+      "description": "Sponsor on GitHub Sponsors"
+    }
+  ],
+  "icon": ".github/img/tox.png",
+  "galleryBanner": {
+    "color": "#92a16d",
+    "theme": "light"
+  },
   "engines": {
     "vscode": "^1.57.0"
   },
-  "categories": [
-    "Other"
-  ],
+  "categories": ["Programming Languages", "Linters", "Other"],
   "activationEvents": [
     "onCommand:python-tox.select",
     "onCommand:python-tox.selectMultiple"
