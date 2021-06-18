@@ -65,7 +65,7 @@ jobs:
         path: "*.vsix"
     - name: Publish to Marketplace
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
-      run: npm run deploy
+      run: npm run publish
       env:
         VSCE_PAT: ${{ secrets.VSCE_PAT }}
     - name: Publish to Open VSX
