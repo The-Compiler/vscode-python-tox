@@ -85,3 +85,11 @@ Then install the resulting `.vsix` file using the command palette and selecting
 ## Release Notes
 
 See [CHANGELOG.md](CHANGELOG.md).
+
+## Releasing checklist
+
+- Double-check the CI
+- `npm version <major|minor|patch>`
+- `git push origin`
+- `git push origin vX.Y.Z`
+- Lean back and let the CI do the rest
