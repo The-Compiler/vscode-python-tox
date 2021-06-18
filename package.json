@@ -22,7 +22,7 @@
       "description": "Sponsor on GitHub Sponsors"
     }
   ],
-  "icon": ".github/img/tox.png",
+  "icon": "img/tox.png",
   "galleryBanner": {
     "color": "#92a16d",
     "theme": "light"

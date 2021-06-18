@@ -26,7 +26,7 @@
 
 This extension integrates the [tox](https://tox.readthedocs.io/) task automation tool with Visual Studio Code.
 
-![Screenshot](.github/img/quickpick.png)
+![Screenshot](img/quickpick.png)
 
 ## Here be dragons
 
