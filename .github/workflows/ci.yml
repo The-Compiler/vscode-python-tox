@@ -63,3 +63,11 @@ jobs:
       with:
         name: "vscode-python-tox-${{ github.sha }}"
         path: "*.vsix"
+    - name: Publish to Marketplace
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      run: npm run deploy
+      env:
+        VSCE_PAT: ${{ secrets.VSCE_PAT }}
+    - name: Publish to Open VSX
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      run: "npx ovsx publish *.vsix -p ${{ secrets.OPEN_VSX_TOKEN }}"
