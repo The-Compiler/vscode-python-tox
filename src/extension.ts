@@ -26,6 +26,7 @@ function findProjectDir() {
 }
 
 async function getToxEnvs(projDir: string) {
+	console.log(projDir);
 	const { stdout } = await exec('tox -a', {cwd: projDir});
 	return stdout.trim().split(os.EOL);
 }
@@ -33,13 +34,13 @@ async function getToxEnvs(projDir: string) {
 async function safeGetToxEnvs(projDir: string) {
 	try {
 		return await getToxEnvs(projDir);
-	} catch (error) {
+	} catch (error: any) {
 		vscode.window.showErrorMessage(error.message);
 		return;
 	}
 }
 
-function runTox(envs: string[], projDir: string) {
+function runTox(envs: string[], toxArguments: string, projDir: string) {
 	const term = vscode.window.createTerminal({"cwd": projDir, "name": "tox"});
 	const envArg = envs.join(",");
 	term.show(true);  // preserve focus
@@ -56,7 +57,7 @@ function runTox(envs: string[], projDir: string) {
 	// - Real tox environment names are very unlikely to accidentally contain
 	//   such characters - in fact, using spaces in env names seems to not work
 	//   properly at all.
-	term.sendText(`tox -e ${envArg}`);
+	term.sendText(`tox ${toxArguments} -e ${envArg}`);
 }
 
 async function selectCommand() {
@@ -69,7 +70,15 @@ async function selectCommand() {
 	if (!selected) {
 		return;
 	}
-	runTox([selected], projDir);
+
+	const toxArguments = await vscode.window.showInputBox({ prompt: 'Input additional flags in plain text, e.g. -vv', value: ""});
+	
+	// Only cancel on escape (undefined), allow empty string to proceed.
+	if (toxArguments === undefined) {
+		return;
+	}
+
+	runTox([selected], toxArguments, projDir);
 }
 
 async function selectMultipleCommand() {
@@ -82,7 +91,7 @@ async function selectMultipleCommand() {
 	if (!selected) {
 		return;
 	}
-	runTox(selected, projDir);
+	runTox(selected, "", projDir);
 }
 
 export function activate(context: vscode.ExtensionContext) {

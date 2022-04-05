@@ -63,7 +63,7 @@ suite('Extension Test Suite', () => {
 		fs.mkdirSync(tmpdir, {recursive: true});
 		fs.rmSync(marker, {force: true});
 
-		await extension._private.runTox(["test"], dir);
+		await extension._private.runTox(["test"], "-v", dir);
 		const terminal = await waitForTerminal();
 		assert.equal(terminal.name, "tox");
 
