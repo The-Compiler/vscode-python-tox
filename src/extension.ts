@@ -57,7 +57,8 @@ function runTox(envs: string[], toxArguments: string, projDir: string) {
 	// - Real tox environment names are very unlikely to accidentally contain
 	//   such characters - in fact, using spaces in env names seems to not work
 	//   properly at all.
-	term.sendText(`tox ${toxArguments} -e ${envArg}`);
+	let terminalCommand = `tox ${toxArguments} -e ${envArg}`;
+	term.sendText(terminalCommand);
 }
 
 async function selectCommand() {
