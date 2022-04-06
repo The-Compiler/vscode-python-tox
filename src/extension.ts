@@ -85,10 +85,15 @@ async function selectMultipleCommand() {
 	runTox(selected, projDir);
 }
 
+async function openDocumentationCommand() {
+	vscode.env.openExternal(vscode.Uri.parse("https://tox.wiki"));
+}
+
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('python-tox.select', selectCommand),
-		vscode.commands.registerCommand('python-tox.selectMultiple', selectMultipleCommand)
+		vscode.commands.registerCommand('python-tox.selectMultiple', selectMultipleCommand),
+		vscode.commands.registerCommand('python-tox.openDocs', openDocumentationCommand)
 	);
 }
 

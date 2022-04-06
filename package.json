@@ -39,7 +39,8 @@
   ],
   "activationEvents": [
     "onCommand:python-tox.select",
-    "onCommand:python-tox.selectMultiple"
+    "onCommand:python-tox.selectMultiple",
+    "onCommand:python-tox.openDocs"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -51,6 +52,10 @@
       {
         "command": "python-tox.selectMultiple",
         "title": "Select and run multiple tox environments"
+      },
+      {
+        "command": "python-tox.openDocs",
+        "title": "Open tox documentation in default browser"
       }
     ]
   },
