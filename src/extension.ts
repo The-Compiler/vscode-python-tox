@@ -34,7 +34,7 @@ async function safeGetToxEnvs(projDir: string) {
 	try {
 		return await getToxEnvs(projDir);
 	} catch (error) {
-		vscode.window.showErrorMessage(error.message);
+		vscode.window.showErrorMessage((error as Error).message);
 		return;
 	}
 }
