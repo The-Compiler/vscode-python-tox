@@ -63,7 +63,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "download-api": "vscode-dts dev",
-		"postdownload-api": "vscode-dts main",
+    "postdownload-api": "vscode-dts main",
     "postinstall": "npm run download-api",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts --max-warnings=0",
