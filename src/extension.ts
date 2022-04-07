@@ -101,6 +101,49 @@ export function activate(context: vscode.ExtensionContext) {
 			await parseTestsInFileContents(test);
 		}
 	};
+
+	async function runHandler(
+		shouldDebug: boolean,
+		request: vscode.TestRunRequest,
+		token: vscode.CancellationToken) 
+	{
+		const run = controller.createTestRun(request);
+		const queue: vscode.TestItem[] = [];
+		
+		if (request.include) {
+			request.include.forEach(test => queue.push(test));
+		}
+		
+		while (queue.length > 0 && !token.isCancellationRequested) {
+			const test = queue.pop()!;
+		
+			// Skip tests the user asked to exclude
+			if (request.exclude?.includes(test)) {
+				continue;
+			}
+			
+			const start = Date.now();
+			try {
+				const cwd = vscode.workspace.getWorkspaceFolder(test.uri!)!.uri.path;
+				runTox([test.label], cwd);
+				run.passed(test, Date.now() - start);
+			} 
+			catch (e: any) {
+				run.failed(test, new vscode.TestMessage(e.message), Date.now() - start);
+			}
+		}
+		
+		// Make sure to end the run after all tests have been executed:
+		run.end();
+	}
+
+	const runProfile = controller.createRunProfile(
+		'Run',
+		vscode.TestRunProfileKind.Run,
+		(request, token) => {
+			runHandler(false, request, token);
+		}
+	);
 	
 	// When text documents are open, parse tests in them.
 	vscode.workspace.onDidOpenTextDocument(parseTestsInDocument);
@@ -134,9 +177,20 @@ export function activate(context: vscode.ExtensionContext) {
 	 * @param e	The provided document
 	 * @param filename	The name of the file to look for. Default = tox.ini
 	 */
-	function parseTestsInDocument(e: vscode.TextDocument, filename: string = 'tox.ini') {
+	async function parseTestsInDocument(e: vscode.TextDocument, filename: string = 'tox.ini') {
 		if (e.uri.scheme === 'file' && e.uri.path.endsWith(filename)) {
-			parseTestsInFileContents(getOrCreateFile(e.uri), e.getText());
+			const file = getOrCreateFile(e.uri);
+			const content = e.getText();
+
+			// Empty existing children
+			file.children.forEach(element => {
+				file.children.delete(element.id);
+			});
+
+			const listOfChildren = await parseTestsInFileContents(file, content);
+			listOfChildren.forEach((testItem) => {
+				file.children.add(testItem);
+			});
 		}
 	}
 
@@ -145,12 +199,33 @@ export function activate(context: vscode.ExtensionContext) {
 	 * @param file The file to parse
 	 * @param contents The contents of the file
 	 */
-	async function parseTestsInFileContents(file: vscode.TestItem, contents?: string) {
+	async function parseTestsInFileContents(file: vscode.TestItem, contents?: string): Promise<vscode.TestItem[]> {
 		
-		// TODO: Make the new TestItem be under the existing one
-		const newTestItem = controller.createTestItem("cowsay", "cowsay", file.uri);
+		if (contents === undefined) {
+			const rawContent = await vscode.workspace.fs.readFile(file.uri!);
+			contents = new util.TextDecoder().decode(rawContent);
+		}
 
-		controller.items.add(newTestItem);
+		let listOfChildren: vscode.TestItem[] = [];
+
+		const testRegex = /(\[testenv):(.*)\]/gm;  // made with https://regex101.com
+		let lines = contents.split('\n');
+
+		for (let lineNo = 0; lineNo < lines.length; lineNo++) {
+			let line = lines[lineNo];
+    		let regexResult = testRegex.exec(line);
+
+			if (regexResult) {
+				let range = new vscode.Range(new vscode.Position(lineNo, 0), new vscode.Position(lineNo, regexResult[0].length));
+				
+				const newTestItem = controller.createTestItem(regexResult[2], regexResult[2], file.uri);
+				newTestItem.range = range;
+
+				listOfChildren.push(newTestItem);
+			}
+		}
+		
+		return listOfChildren;
 	}
 
 	async function discoverAllFilesInWorkspace() {
