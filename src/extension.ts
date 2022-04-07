@@ -60,7 +60,7 @@ function runTox(envs: string[], toxArguments: string, terminal: vscode.Terminal 
 	terminal.sendText(terminalCommand);
 }
 
-function getTerminal(projDir : string = findProjectDir(), name : string = "tox") {
+function getTerminal(projDir : string = findProjectDir(), name : string = "tox") : vscode.Terminal {
 	return vscode.window.createTerminal({"cwd": projDir, "name": name});
 }
 
