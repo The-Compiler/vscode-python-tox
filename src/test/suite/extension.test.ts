@@ -1,3 +1,4 @@
+
 import { strict as assert } from 'assert';
 
 // You can import and use all API from the 'vscode' module
@@ -6,7 +7,6 @@ import * as vscode from 'vscode';
 import * as extension from '../../extension';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as util from 'util';
 
 function getExampleDir(name: string) {
 	const dir = path.join(__dirname, '..', '..', '..', 'src', 'test', 'examples', name);
@@ -63,7 +63,7 @@ suite('Extension Test Suite', () => {
 		fs.mkdirSync(tmpdir, {recursive: true});
 		fs.rmSync(marker, {force: true});
 
-		await extension._private.runTox(["test"], "-v", dir);
+		await extension._private.runTox(["test"], "", extension._private.getTerminal(dir));
 		const terminal = await waitForTerminal();
 		assert.equal(terminal.name, "tox");
 

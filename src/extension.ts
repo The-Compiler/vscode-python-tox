@@ -40,10 +40,9 @@ async function safeGetToxEnvs(projDir: string) {
 	}
 }
 
-function runTox(envs: string[], toxArguments: string, projDir: string) {
-	const term = vscode.window.createTerminal({"cwd": projDir, "name": "tox"});
+function runTox(envs: string[], toxArguments: string, terminal: vscode.Terminal = getTerminal() ) {
 	const envArg = envs.join(",");
-	term.show(true);  // preserve focus
+	terminal.show(true);  // preserve focus
 
 	// FIXME In theory, there's a command injection here, if an environment name
 	// contains shell metacharacters. However:
@@ -58,7 +57,11 @@ function runTox(envs: string[], toxArguments: string, projDir: string) {
 	//   such characters - in fact, using spaces in env names seems to not work
 	//   properly at all.
 	let terminalCommand = `tox ${toxArguments} -e ${envArg}`;
-	term.sendText(terminalCommand);
+	terminal.sendText(terminalCommand);
+}
+
+function getTerminal(projDir : string = findProjectDir(), name : string = "tox") {
+	return vscode.window.createTerminal({"cwd": projDir, "name": name});
 }
 
 async function selectCommand() {
@@ -79,7 +82,7 @@ async function selectCommand() {
 		return;
 	}
 
-	runTox([selected], toxArguments, projDir);
+	runTox([selected], toxArguments, getTerminal(projDir));
 }
 
 async function selectMultipleCommand() {
@@ -92,7 +95,7 @@ async function selectMultipleCommand() {
 	if (!selected) {
 		return;
 	}
-	runTox(selected, "", projDir);
+	runTox(selected, "", getTerminal(projDir));
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -108,4 +111,5 @@ export function deactivate() {}
 export const _private = {
 	getToxEnvs,
 	runTox,
+	getTerminal
 };
