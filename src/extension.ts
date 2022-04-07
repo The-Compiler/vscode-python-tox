@@ -34,8 +34,8 @@ async function getToxEnvs(projDir: string) {
 async function safeGetToxEnvs(projDir: string) {
 	try {
 		return await getToxEnvs(projDir);
-	} catch (error: any) {
-		vscode.window.showErrorMessage(error.message);
+	} catch (error) {
+		vscode.window.showErrorMessage((error as Error).message);
 		return;
 	}
 }
@@ -98,10 +98,15 @@ async function selectMultipleCommand() {
 	runTox(selected, "", getTerminal(projDir));
 }
 
+async function openDocumentationCommand() {
+	vscode.env.openExternal(vscode.Uri.parse("https://tox.wiki"));
+}
+
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('python-tox.select', selectCommand),
-		vscode.commands.registerCommand('python-tox.selectMultiple', selectMultipleCommand)
+		vscode.commands.registerCommand('python-tox.selectMultiple', selectMultipleCommand),
+		vscode.commands.registerCommand('python-tox.openDocs', openDocumentationCommand)
 	);
 }
 

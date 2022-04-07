@@ -2,6 +2,12 @@
 
 All notable changes to the "python-tox" extension will be documented in this file.
 
+## v0.1.0
+
+- New `python-tox.openDocs` command to open the tox documentation in the
+  default browser.
+- Upgraded all dependencies.
+
 ## v0.0.3
 
 - Updated documentation and `package.json`
