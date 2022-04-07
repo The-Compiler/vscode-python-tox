@@ -1,4 +1,3 @@
-
 import { strict as assert } from 'assert';
 
 // You can import and use all API from the 'vscode' module
@@ -7,6 +6,7 @@ import * as vscode from 'vscode';
 import * as extension from '../../extension';
 import * as path from 'path';
 import * as fs from 'fs';
+import {mock, verify, instance} from 'ts-mockito';
 
 function getExampleDir(name: string) {
 	const dir = path.join(__dirname, '..', '..', '..', 'src', 'test', 'examples', name);
@@ -70,4 +70,20 @@ suite('Extension Test Suite', () => {
 		await waitForMarker(tmpdir);
 		assert.ok(fs.existsSync(marker));
 	});
+
+	test('running tox with arguments', () => {
+		let mockedTerminal : vscode.Terminal = mock<vscode.Terminal>();
+
+		const envs = ["test"];
+		const toxArguments = "-v";
+
+		const envArg = envs.join(",");
+		const terminalCommand = `tox ${toxArguments} -e ${envArg}`;
+		
+		extension._private.runTox(envs, toxArguments, instance(mockedTerminal));
+
+		verify(mockedTerminal.show(true)).called();
+		verify(mockedTerminal.sendText(terminalCommand)).called();
+	});
+
 });
