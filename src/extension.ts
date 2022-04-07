@@ -4,6 +4,10 @@ import * as util from 'util';
 import * as path from 'path';
 import * as os from 'os';
 
+import { ToxTaskProvider } from './toxTaskProvider';
+
+let toxTaskProvider: vscode.Disposable | undefined;
+
 const exec = util.promisify(child_process.exec);
 
 function findProjectDir() {
@@ -26,7 +30,7 @@ function findProjectDir() {
 }
 
 async function getToxEnvs(projDir: string) {
-	const { stdout } = await exec('tox -a', {cwd: projDir});
+	const { stdout } = await exec('tox -a', { cwd: projDir });
 	return stdout.trim().split(os.EOL);
 }
 
@@ -40,7 +44,7 @@ async function safeGetToxEnvs(projDir: string) {
 }
 
 function runTox(envs: string[], projDir: string) {
-	const term = vscode.window.createTerminal({"cwd": projDir, "name": "tox"});
+	const term = vscode.window.createTerminal({ "cwd": projDir, "name": "tox" });
 	const envArg = envs.join(",");
 	term.show(true);  // preserve focus
 
@@ -65,7 +69,7 @@ async function selectCommand() {
 	if (!envs) {
 		return;
 	}
-	const selected = await vscode.window.showQuickPick(envs, {placeHolder: "tox environment"});
+	const selected = await vscode.window.showQuickPick(envs, { placeHolder: "tox environment" });
 	if (!selected) {
 		return;
 	}
@@ -78,7 +82,7 @@ async function selectMultipleCommand() {
 	if (!envs) {
 		return;
 	}
-	const selected = await vscode.window.showQuickPick(envs, {placeHolder: "tox environments", canPickMany: true});
+	const selected = await vscode.window.showQuickPick(envs, { placeHolder: "tox environments", canPickMany: true });
 	if (!selected) {
 		return;
 	}
@@ -90,6 +94,10 @@ async function openDocumentationCommand() {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+	const workspaceTox = findProjectDir();
+	if (workspaceTox) {
+		toxTaskProvider = vscode.tasks.registerTaskProvider(ToxTaskProvider.ToxType, new ToxTaskProvider(workspaceTox));
+	}
 	context.subscriptions.push(
 		vscode.commands.registerCommand('python-tox.select', selectCommand),
 		vscode.commands.registerCommand('python-tox.selectMultiple', selectMultipleCommand),
@@ -97,7 +105,13 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 }
 
-export function deactivate() {}
+export function deactivate() {
+
+	if (toxTaskProvider) {
+		toxTaskProvider.dispose();
+	}
+
+}
 
 // For testing, before we move this to a utils.ts
 export const _private = {

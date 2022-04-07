@@ -4,3 +4,6 @@ node_modules
 .vscode-test/
 *.vsix
 src/test/examples/*/.tox
+
+# Python venvs
+.venv
