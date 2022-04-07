@@ -215,7 +215,8 @@ export function activate(context: vscode.ExtensionContext) {
 			let line = lines[lineNo];
     		let regexResult = testRegex.exec(line);
 
-			if (regexResult) {
+			// Excluding tox permutations for now
+			if (regexResult && !regexResult[2].includes('{')) {
 				let range = new vscode.Range(new vscode.Position(lineNo, 0), new vscode.Position(lineNo, regexResult[0].length));
 				
 				const newTestItem = controller.createTestItem(regexResult[2], regexResult[2], file.uri);
