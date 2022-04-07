@@ -149,7 +149,7 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.onDidOpenTextDocument(parseTestsInDocument);
 	
 	// We could also listen to document changes to re-parse unsaved changes:
-	vscode.workspace.onDidChangeTextDocument(e => parseTestsInDocument(e.document));
+	vscode.workspace.onDidSaveTextDocument(document => parseTestsInDocument(document));
 
 	/**
 	 * In this function, we'll get the file TestItem if we've already found it,
