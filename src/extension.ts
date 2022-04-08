@@ -158,7 +158,7 @@ export function activate(context: vscode.ExtensionContext) {
 	 * @param uri	The uri of the file to get or create
 	 * @returns vscode.TestItem
 	 */
-	function getOrCreateFile(uri: vscode.Uri) 
+	function getOrCreateFile(uri: vscode.Uri): vscode.TestItem
 	{
 		const existing = controller.items.get(uri.toString());
 		if (existing) {
