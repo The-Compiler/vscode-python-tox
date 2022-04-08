@@ -26,6 +26,7 @@ function findProjectDir() {
 }
 
 async function getToxEnvs(projDir: string) {
+	console.log(projDir);
 	const { stdout } = await exec('tox -a', {cwd: projDir});
 	return stdout.trim().split(os.EOL);
 }
@@ -39,10 +40,9 @@ async function safeGetToxEnvs(projDir: string) {
 	}
 }
 
-function runTox(envs: string[], projDir: string) {
-	const term = vscode.window.createTerminal({"cwd": projDir, "name": "tox"});
+function runTox(envs: string[], toxArguments: string, terminal: vscode.Terminal = getTerminal() ) {
 	const envArg = envs.join(",");
-	term.show(true);  // preserve focus
+	terminal.show(true);  // preserve focus
 
 	// FIXME In theory, there's a command injection here, if an environment name
 	// contains shell metacharacters. However:
@@ -56,7 +56,12 @@ function runTox(envs: string[], projDir: string) {
 	// - Real tox environment names are very unlikely to accidentally contain
 	//   such characters - in fact, using spaces in env names seems to not work
 	//   properly at all.
-	term.sendText(`tox -e ${envArg}`);
+	let terminalCommand = `tox ${toxArguments} -e ${envArg}`;
+	terminal.sendText(terminalCommand);
+}
+
+function getTerminal(projDir : string = findProjectDir(), name : string = "tox") : vscode.Terminal {
+	return vscode.window.createTerminal({"cwd": projDir, "name": name});
 }
 
 async function selectCommand() {
@@ -69,7 +74,15 @@ async function selectCommand() {
 	if (!selected) {
 		return;
 	}
-	runTox([selected], projDir);
+
+	const toxArguments = await vscode.window.showInputBox({ prompt: 'Input additional flags in plain text, e.g. -vv', value: ""});
+	
+	// Only cancel on escape (undefined), allow empty string to proceed.
+	if (toxArguments === undefined) {
+		return;
+	}
+
+	runTox([selected], toxArguments, getTerminal(projDir));
 }
 
 async function selectMultipleCommand() {
@@ -82,7 +95,7 @@ async function selectMultipleCommand() {
 	if (!selected) {
 		return;
 	}
-	runTox(selected, projDir);
+	runTox(selected, "", getTerminal(projDir));
 }
 
 async function openDocumentationCommand() {
@@ -270,4 +283,5 @@ export function deactivate() {}
 export const _private = {
 	getToxEnvs,
 	runTox,
+	getTerminal
 };
