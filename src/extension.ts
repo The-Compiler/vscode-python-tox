@@ -56,7 +56,7 @@ function runTox(envs: string[], toxArguments: string, terminal: vscode.Terminal 
 	// - Real tox environment names are very unlikely to accidentally contain
 	//   such characters - in fact, using spaces in env names seems to not work
 	//   properly at all.
-	let terminalCommand = `tox ${toxArguments} -e ${envArg}`;
+	let terminalCommand = `tox -e ${envArg} ${toxArguments}`;
 	terminal.sendText(terminalCommand);
 }
 
@@ -75,7 +75,7 @@ async function selectCommand() {
 		return;
 	}
 
-	const toxArguments = await vscode.window.showInputBox({ prompt: 'Input additional flags in plain text, e.g. -vv', value: ""});
+	const toxArguments = await vscode.window.showInputBox({ prompt: 'Input additional flags in plain text, e.g. [-vv] [-- {posargs}]', value: ""});
 	
 	// Only cancel on escape (undefined), allow empty string to proceed.
 	if (toxArguments === undefined) {

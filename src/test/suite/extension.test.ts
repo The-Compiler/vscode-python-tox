@@ -78,7 +78,7 @@ suite('Extension Test Suite', () => {
 		const toxArguments = "-v";
 
 		const envArg = envs.join(",");
-		const terminalCommand = `tox ${toxArguments} -e ${envArg}`;
+		const terminalCommand = `tox -e ${envArg} ${toxArguments}`;
 		
 		extension._private.runTox(envs, toxArguments, instance(mockedTerminal));
 
