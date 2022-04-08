@@ -60,7 +60,18 @@ function runTox(envs: string[], toxArguments: string, terminal: vscode.Terminal 
 	terminal.sendText(terminalCommand);
 }
 
+/**
+ * Get a new terminal or use an existing one with the same name.
+ * @param projDir The directory of the project.
+ * @param name The name of the terminal
+ * @returns The terminal to run commands on.
+ */
 function getTerminal(projDir : string = findProjectDir(), name : string = "tox") : vscode.Terminal {
+	for (const terminal of vscode.window.terminals) {
+		if (terminal.name === name){
+			return terminal;
+		}
+	}
 	return vscode.window.createTerminal({"cwd": projDir, "name": name});
 }
 
