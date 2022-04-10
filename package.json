@@ -40,7 +40,8 @@
   "activationEvents": [
     "onCommand:python-tox.select",
     "onCommand:python-tox.selectMultiple",
-    "onCommand:python-tox.openDocs"
+    "onCommand:python-tox.openDocs",
+    "onCommand:python-tox.createEnv"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -56,8 +57,25 @@
       {
         "command": "python-tox.openDocs",
         "title": "Open tox documentation in default browser"
+      },
+      {
+        "command": "python-tox.createEnv",
+        "title": "Create new tox environment"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "python-tox",
+      "properties": {
+        "python-tox.environment.template.new": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "default": null,
+          "description": "Path to template file (within workspace)"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -77,10 +95,15 @@
     "@typescript-eslint/eslint-plugin": "^5.18.0",
     "@typescript-eslint/parser": "^5.18.0",
     "@vscode/test-electron": "^2.1.3",
+    "@types/lodash": "^4.14.181",
     "eslint": "^8.12.0",
     "glob": "^7.2.0",
     "mocha": "^9.2.2",
+    "ts-mockito": "^2.6.1",
     "typescript": "^4.6.3",
     "vsce": "^2.7.0"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
   }
 }

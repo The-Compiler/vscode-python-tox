@@ -3,8 +3,10 @@ import * as child_process from 'child_process';
 import * as util from 'util';
 import * as path from 'path';
 import * as os from 'os';
+import { ToxEnvironmentService } from './service/toxEnvironmentService';
 
 const exec = util.promisify(child_process.exec);
+const ExtensionName = "python-tox";
 
 function findProjectDir() {
 	const docUri = vscode.window.activeTextEditor?.document.uri;
@@ -89,12 +91,34 @@ async function openDocumentationCommand() {
 	vscode.env.openExternal(vscode.Uri.parse("https://tox.wiki"));
 }
 
+/**
+ * Handler called when extenion gets activated
+ * @param context 
+ */
 export function activate(context: vscode.ExtensionContext) {
+
+	// initialize command handlers)
+	initializeServices();
+
 	context.subscriptions.push(
 		vscode.commands.registerCommand('python-tox.select', selectCommand),
 		vscode.commands.registerCommand('python-tox.selectMultiple', selectMultipleCommand),
-		vscode.commands.registerCommand('python-tox.openDocs', openDocumentationCommand)
+		vscode.commands.registerCommand('python-tox.openDocs', openDocumentationCommand),
+
+		// add a new tox environment config to the tox.ini file
+		vscode.commands.registerCommand(
+			ToxEnvironmentService.COMMAND_NEW_ENVIRONMENT, 
+			() => environmentService.createNewEnvironment(path.join(findProjectDir(),"tox.ini")))
 	);
+}
+
+let environmentService : ToxEnvironmentService;
+
+/**
+ * Initialize extension services
+ */
+function initializeServices() {
+	environmentService = new ToxEnvironmentService(ExtensionName);
 }
 
 export function deactivate() {}
@@ -104,3 +128,5 @@ export const _private = {
 	getToxEnvs,
 	runTox,
 };
+
+
