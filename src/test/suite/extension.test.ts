@@ -7,6 +7,7 @@ import * as extension from '../../extension';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as util from 'util';
+import * as tasks from '../../toxTaskProvider';
 
 function getExampleDir(name: string) {
 	const dir = path.join(__dirname, '..', '..', '..', 'src', 'test', 'examples', name);
@@ -69,5 +70,13 @@ suite('Extension Test Suite', () => {
 
 		await waitForMarker(tmpdir);
 		assert.ok(fs.existsSync(marker));
+	});
+
+	test('getting tox tasks', async() => {
+		const dir = getExampleDir("allenvs");
+		const toxTaskProvider = new tasks.ToxTaskProvider(dir);
+		toxTaskProvider.provideTasks()?.then( (toxTasks) => {
+			assert.deepEqual(toxTasks, ["one", "two", "three"]);
+		});
 	});
 });

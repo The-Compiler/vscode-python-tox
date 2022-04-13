@@ -96,7 +96,7 @@ async function openDocumentationCommand() {
 export function activate(context: vscode.ExtensionContext) {
 	const workspaceTox = findProjectDir();
 	if (workspaceTox) {
-		toxTaskProvider = vscode.tasks.registerTaskProvider(ToxTaskProvider.ToxType, new ToxTaskProvider(workspaceTox));
+		toxTaskProvider = vscode.tasks.registerTaskProvider(ToxTaskProvider.toxType, new ToxTaskProvider(workspaceTox));
 	}
 	context.subscriptions.push(
 		vscode.commands.registerCommand('python-tox.select', selectCommand),

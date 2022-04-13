@@ -5,12 +5,12 @@ import * as vscode from 'vscode';
 import { error } from 'console';
 
 export class ToxTaskProvider implements vscode.TaskProvider {
-    static ToxType = 'tox';
-    static ToxIni = 'tox.ini';
+    static readonly toxType = 'tox';
+    static readonly toxIni = 'tox.ini';
     private toxPromise: Thenable<vscode.Task[]> | undefined = undefined;
 
     constructor(workspaceRoot: string) {
-        const pattern = path.join(workspaceRoot, ToxTaskProvider.ToxIni);
+        const pattern = path.join(workspaceRoot, ToxTaskProvider.toxIni);
         const fileWatcher = vscode.workspace.createFileSystemWatcher(pattern);
         fileWatcher.onDidChange(() => this.toxPromise = undefined);
         fileWatcher.onDidCreate(() => this.toxPromise = undefined);
@@ -28,7 +28,7 @@ export class ToxTaskProvider implements vscode.TaskProvider {
         const testenv = _task.definition.testenv;
         if (testenv) {
             const definition: ToxTaskDefinition = <any>_task.definition;
-            return new vscode.Task(definition, _task.scope ?? vscode.TaskScope.Workspace, definition.testenv, ToxTaskProvider.ToxType, new vscode.ShellExecution(`tox -e ${definition.testenv}`));
+            return new vscode.Task(definition, _task.scope ?? vscode.TaskScope.Workspace, definition.testenv, ToxTaskProvider.toxType, new vscode.ShellExecution(`tox -e ${definition.testenv}`));
         }
         return undefined;
     }
@@ -99,7 +99,7 @@ async function getToxTestenvs(): Promise<vscode.Task[]> {
         if (!folderString) {
             continue;
         }
-        const toxFile = path.join(folderString, ToxTaskProvider.ToxIni);
+        const toxFile = path.join(folderString, ToxTaskProvider.toxIni);
         if (!await exists(toxFile)) {
             continue;
         }
@@ -117,13 +117,13 @@ async function getToxTestenvs(): Promise<vscode.Task[]> {
                     if (line.length === 0) {
                         continue;
                     }
-                    const toxTestenv = line
+                    const toxTestenv = line;
                     const kind: ToxTaskDefinition = {
-                        type: ToxTaskProvider.ToxType,
+                        type: ToxTaskProvider.toxType,
                         testenv: toxTestenv
-                    }
+                    };
 
-                    const task = new vscode.Task(kind, workspaceFolder, toxTestenv, ToxTaskProvider.ToxType, new vscode.ShellExecution(`tox -e ${toxTestenv}`));
+                    const task = new vscode.Task(kind, workspaceFolder, toxTestenv, ToxTaskProvider.toxType, new vscode.ShellExecution(`tox -e ${toxTestenv}`));
                     result.push(task);
                     const lowerCaseLine = line.toLowerCase();
                     if (isBuildTask(lowerCaseLine)) {
