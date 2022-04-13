@@ -5,5 +5,5 @@ export interface ConfigNewEnvironment {
     /**
      * Template file path
      */
-    filePath: string;
+    templateFilePath: string;
 }

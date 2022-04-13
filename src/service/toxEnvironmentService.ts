@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { ConfigNewEnvironment } from '../model/toxConfiguration';
 import * as fs from 'fs';
 import * as _ from "lodash";
+import { ToxEnvironment } from '../model/toxEnvironment';
 
 /**
  * The ToxEnvironmentService enables clients to 
@@ -12,26 +13,26 @@ export class ToxEnvironmentService {
     /**
      * VSCode command id to create a new tox environment
      */
-    public static COMMAND_NEW_ENVIRONMENT = "python-tox.createEnv";
+    public static commandNewEnvironment = "python-tox.createEnv";
+
+    /**
+     * Token delimitor for updating config templates. Default expression is ${..}
+     */
+    private readonly _tokenDelimiter: RegExp = /\${([\s\S]+?)}/g;
 
     private readonly _extensionName: string;
-    private readonly _tokenDelimiter: RegExp;
 
     /**
      * Constructor
      * @param extensionName Extensions name
-     * @param tokenDelimiter Token delimitor for updating config templates
      */
-    public constructor(extensionName: string, tokenDelimiter: RegExp = /\${([\s\S]+?)}/g) {
+    public constructor(
+        extensionName: string) {
         if (!extensionName) {
-            throw new TypeError("ExtensionName is invalid")
+            throw new TypeError("ExtensionName is invalid");
         }
-        if (!tokenDelimiter) {
-            throw new TypeError("TokenDelimiter is invalid");
-        }
-
+        
         this._extensionName = extensionName;
-        this._tokenDelimiter = tokenDelimiter;
     }
 
     /**
@@ -40,8 +41,8 @@ export class ToxEnvironmentService {
      * @param templateConfigSection config section id that contains the env templates
      * @returns 
      */
-    public async createNewEnvironment(toxIniPath: string, templateConfigSection: string = "environment.template.new") {   
-        const inputBoxTitle = `${this._extensionName}: Create Tox Environment`
+    public async createNewEnvironment(toxIniPath: string, templateConfigSection: string = "environment.template.new"): Promise<ToxEnvironment | undefined> {   
+        const inputBoxTitle = `${this._extensionName}: Create Tox Environment`;
 
         // get the tox.ini path
         const toxInitPathConfirmed = await vscode.window.showInputBox({ 
@@ -51,7 +52,7 @@ export class ToxEnvironmentService {
         });
         if (!toxInitPathConfirmed) {
             // user cancelled operation
-            return;
+            return undefined;
         }
         
         // get the name of the new tox environment
@@ -59,11 +60,11 @@ export class ToxEnvironmentService {
             title: inputBoxTitle, 
             prompt: "Enter new tox environment name", 
             value: "my-new-tox-env",
-            validateInput: (input) => (input == undefined || input.length == 0) ? "Invalid environment name" : "" 
+            validateInput: (input) => (input === undefined || input.length === 0) ? "Invalid environment name" : "" 
         });
         if (!newEnvName) {
             // user cancelled operation
-            return;
+            return undefined;
         }
 
         // retrieve the configured template for a new tox env
@@ -73,34 +74,42 @@ export class ToxEnvironmentService {
 
         // create the new env string
         let toxEnvironmentConfig = `[${newEnvName}]`;									
-        if (templateConfig && templateConfig.filePath) {
+        if (templateConfig && templateConfig.templateFilePath) {
             // read the content & do string interpolation
-            toxEnvironmentConfig = this.prepareEnvironmentConfig(templateConfig.filePath, newEnvName);
+            toxEnvironmentConfig = this.prepareEnvironmentConfig(templateConfig.templateFilePath, newEnvName);
         }
 
         // add new env to tox.ini
-        var { success, doc } = await this.addToxEnvironment(toxInitPathConfirmed, toxEnvironmentConfig);
-        if (success) {
-            const editor = await vscode.window.showTextDocument(doc, { preview: false });
+        var updatedDoc = await this.addToxEnvironment(toxInitPathConfirmed, toxEnvironmentConfig);
+        if (!updatedDoc) {
+            return undefined;
         }
+
+        await vscode.window.showTextDocument(updatedDoc, { preview: false });
+        return {
+            name: newEnvName,
+            doc: updatedDoc.uri
+        };
     }
 
-    private async addToxEnvironment(toxIniPath: string, template: string) {
+    private async addToxEnvironment(toxIniPath: string, template: string): Promise<vscode.TextDocument | undefined> {
         const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(toxIniPath));
         const edit = new vscode.WorkspaceEdit();
         edit.insert(doc.uri, new vscode.Position(doc.lineCount + 1, 0), template);
-        let success = await vscode.workspace.applyEdit(edit);
-
-        return { success, doc };
+        
+        return (await vscode.workspace.applyEdit(edit)) ? doc : undefined;
     }
 
-    private prepareEnvironmentConfig(templatePath: fs.PathOrFileDescriptor, toxEnvName: string) {
+    private prepareEnvironmentConfig(templatePath: string, toxEnvName: string): string {
+        /* eslint-disable @typescript-eslint/naming-convention */
         const variableMap = {
             TOX_ENV_NAME: toxEnvName
         };
+        /* eslint-enable @typescript-eslint/naming-convention */
+        
         _.templateSettings.interpolate = this._tokenDelimiter;
         
-        const templateContent = fs.readFileSync(templatePath);
+        const templateContent = vscode.workspace.fs.readFile(vscode.Uri.file(templatePath));
         const compiled = _.template(templateContent.toString());
         return compiled(variableMap);
     }

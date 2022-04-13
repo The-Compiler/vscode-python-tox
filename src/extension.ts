@@ -6,7 +6,10 @@ import * as os from 'os';
 import { ToxEnvironmentService } from './service/toxEnvironmentService';
 
 const exec = util.promisify(child_process.exec);
-const ExtensionName = "python-tox";
+const extensionName = "python-tox";
+const toxIni = "tox.ini";
+
+let environmentService : ToxEnvironmentService;
 
 function findProjectDir() {
 	const docUri = vscode.window.activeTextEditor?.document.uri;
@@ -107,18 +110,16 @@ export function activate(context: vscode.ExtensionContext) {
 
 		// add a new tox environment config to the tox.ini file
 		vscode.commands.registerCommand(
-			ToxEnvironmentService.COMMAND_NEW_ENVIRONMENT, 
-			() => environmentService.createNewEnvironment(path.join(findProjectDir(),"tox.ini")))
+			ToxEnvironmentService.commandNewEnvironment, 
+			() => environmentService.createNewEnvironment(path.join(findProjectDir(), toxIni)))
 	);
 }
-
-let environmentService : ToxEnvironmentService;
 
 /**
  * Initialize extension services
  */
 function initializeServices() {
-	environmentService = new ToxEnvironmentService(ExtensionName);
+	environmentService = new ToxEnvironmentService(extensionName);
 }
 
 export function deactivate() {}
