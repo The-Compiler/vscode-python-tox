@@ -91,7 +91,7 @@ This configuration section contains the relevant fields for creating new tox env
 
 | Fields | Description | Sample value |
 | - | - | - |
-| filePath | File path to the template file. The content of this file is copied when creating a new tox env. Support for token replacement. The following tokens are supported: `TOX_ENV_NAME` | "/usr/template.tox.new"
+| templateFilePath | File path to the template file. The content of this file is copied when creating a new tox env. Support for token replacement. The following tokens are supported: `TOX_ENV_NAME` | "/usr/template.tox.new"
 
 #### Sample template file
 

@@ -68,7 +68,7 @@ export class ToxEnvironmentService {
         }
 
         // retrieve the configured template for a new tox env
-        const templateConfig = vscode.workspace
+        const templateConfig: ConfigNewEnvironment | undefined = vscode.workspace
                                     .getConfiguration(this._extensionName)
                                     ?.get<ConfigNewEnvironment>(templateConfigSection);
 
@@ -76,7 +76,7 @@ export class ToxEnvironmentService {
         let toxEnvironmentConfig = `[${newEnvName}]`;									
         if (templateConfig && templateConfig.templateFilePath) {
             // read the content & do string interpolation
-            toxEnvironmentConfig = this.prepareEnvironmentConfig(templateConfig.templateFilePath, newEnvName);
+            toxEnvironmentConfig = await this.prepareEnvironmentConfig(templateConfig.templateFilePath, newEnvName);
         }
 
         // add new env to tox.ini
@@ -100,7 +100,7 @@ export class ToxEnvironmentService {
         return (await vscode.workspace.applyEdit(edit)) ? doc : undefined;
     }
 
-    private prepareEnvironmentConfig(templatePath: string, toxEnvName: string): string {
+    private async prepareEnvironmentConfig(templatePath: string, toxEnvName: string): Promise<string> {
         /* eslint-disable @typescript-eslint/naming-convention */
         const variableMap = {
             TOX_ENV_NAME: toxEnvName
@@ -109,8 +109,8 @@ export class ToxEnvironmentService {
         
         _.templateSettings.interpolate = this._tokenDelimiter;
         
-        const templateContent = vscode.workspace.fs.readFile(vscode.Uri.file(templatePath));
+        const templateContent = await vscode.workspace.fs.readFile(vscode.Uri.file(templatePath));
         const compiled = _.template(templateContent.toString());
-        return compiled(variableMap);
+        return `\n${compiled(variableMap)}`;
     }
 }
