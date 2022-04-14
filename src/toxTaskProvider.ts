@@ -2,7 +2,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as cp from 'child_process';
 import * as vscode from 'vscode';
-import { error } from 'console';
 
 export class ToxTaskProvider implements vscode.TaskProvider {
     static readonly toxType = 'tox';
@@ -91,6 +90,7 @@ function isTestTask(name: string): boolean {
 async function getToxTestenvs(): Promise<vscode.Task[]> {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     const result: vscode.Task[] = [];
+
     if (!workspaceFolders || workspaceFolders.length === 0) {
         return result;
     }

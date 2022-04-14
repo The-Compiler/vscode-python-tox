@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert';
+import { doesNotMatch, strict as assert } from 'assert';
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
@@ -6,17 +6,10 @@ import * as vscode from 'vscode';
 import * as extension from '../../extension';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as util from 'util';
-import * as tasks from '../../toxTaskProvider';
-
-function getExampleDir(name: string) {
-	const dir = path.join(__dirname, '..', '..', '..', 'src', 'test', 'examples', name);
-	assert.ok(fs.existsSync(dir));
-	return dir;
-}
+import * as utils from './utils';
 
 function getExampleFileUri(name: string, file: string) {
-	const dir = getExampleDir(name);
+	const dir = utils.getExampleDir(name);
 	const filePath = path.join(dir, file);
 	assert.ok(fs.existsSync(filePath));
 	return vscode.Uri.file(filePath);
@@ -45,19 +38,19 @@ suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	test('getting tox environments', async () => {
-		const dir = getExampleDir("simple");
+		const dir = utils.getExampleDir("simple");
 		const envs = await extension._private.getToxEnvs(dir);
 		assert.deepEqual(envs, ["one", "two"]);
 	});
 
 	test('make sure we have all tox environments', async () => {
-		const dir = getExampleDir("allenvs");
+		const dir = utils.getExampleDir("allenvs");
 		const envs = await extension._private.getToxEnvs(dir);
 		assert.deepEqual(envs, ["one", "two", "three"]);
 	});
 
 	test('running tox', async () => {
-		const dir = getExampleDir("end2end");
+		const dir = utils.getExampleDir("end2end");
 
 		const tmpdir = path.join(dir, ".tox", "tmp");
 		const marker = path.join(tmpdir, "tox-did-run");
@@ -70,13 +63,5 @@ suite('Extension Test Suite', () => {
 
 		await waitForMarker(tmpdir);
 		assert.ok(fs.existsSync(marker));
-	});
-
-	test('getting tox tasks', async() => {
-		const dir = getExampleDir("allenvs");
-		const toxTaskProvider = new tasks.ToxTaskProvider(dir);
-		toxTaskProvider.provideTasks()?.then( (toxTasks) => {
-			assert.deepEqual(toxTasks, ["one", "two", "three"]);
-		});
 	});
 });
