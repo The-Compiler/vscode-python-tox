@@ -3,6 +3,7 @@ import * as child_process from 'child_process';
 import * as util from 'util';
 import * as path from 'path';
 import * as os from 'os';
+import { EnvironmentVariablesService } from './environment_variables_service';
 
 const exec = util.promisify(child_process.exec);
 
@@ -26,7 +27,7 @@ function findProjectDir() {
 }
 
 async function getToxEnvs(projDir: string) {
-	const { stdout } = await exec('tox -a', {cwd: projDir});
+	const { stdout } = await exec('tox -a', { cwd: projDir });
 	return stdout.trim().split(os.EOL);
 }
 
@@ -40,7 +41,7 @@ async function safeGetToxEnvs(projDir: string) {
 }
 
 function runTox(envs: string[], projDir: string) {
-	const term = vscode.window.createTerminal({"cwd": projDir, "name": "tox"});
+	const term = vscode.window.createTerminal({ "cwd": projDir, "name": "tox" });
 	const envArg = envs.join(",");
 	term.show(true);  // preserve focus
 
@@ -65,7 +66,7 @@ async function selectCommand() {
 	if (!envs) {
 		return;
 	}
-	const selected = await vscode.window.showQuickPick(envs, {placeHolder: "tox environment"});
+	const selected = await vscode.window.showQuickPick(envs, { placeHolder: "tox environment" });
 	if (!selected) {
 		return;
 	}
@@ -78,7 +79,7 @@ async function selectMultipleCommand() {
 	if (!envs) {
 		return;
 	}
-	const selected = await vscode.window.showQuickPick(envs, {placeHolder: "tox environments", canPickMany: true});
+	const selected = await vscode.window.showQuickPick(envs, { placeHolder: "tox environments", canPickMany: true });
 	if (!selected) {
 		return;
 	}
@@ -93,11 +94,13 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('python-tox.select', selectCommand),
 		vscode.commands.registerCommand('python-tox.selectMultiple', selectMultipleCommand),
-		vscode.commands.registerCommand('python-tox.openDocs', openDocumentationCommand)
+		vscode.commands.registerCommand('python-tox.openDocs', openDocumentationCommand),
+		vscode.languages.registerHoverProvider(['ini'], EnvironmentVariablesService.createHoverProvider())
 	);
+
 }
 
-export function deactivate() {}
+export function deactivate() { }
 
 // For testing, before we move this to a utils.ts
 export const _private = {

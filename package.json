@@ -40,7 +40,8 @@
   "activationEvents": [
     "onCommand:python-tox.select",
     "onCommand:python-tox.selectMultiple",
-    "onCommand:python-tox.openDocs"
+    "onCommand:python-tox.openDocs",
+    "onLanguage:ini"
   ],
   "main": "./out/extension.js",
   "contributes": {
