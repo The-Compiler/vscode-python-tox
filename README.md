@@ -12,7 +12,6 @@
          align="right">
 </a>
 
-
 [![VS Marketplace Version](https://vsmarketplacebadge.apphb.com/version/the-compiler.python-tox.svg)](https://marketplace.visualstudio.com/items?itemName=the-compiler.python-tox)
 [![VS Marketplace Installs](https://vsmarketplacebadge.apphb.com/installs/the-compiler.python-tox.svg)](https://marketplace.visualstudio.com/items?itemName=the-compiler.python-tox)
 [![VS Marketplace Ratings](https://vsmarketplacebadge.apphb.com/rating/the-compiler.python-tox.svg)](https://marketplace.visualstudio.com/items?itemName=the-compiler.python-tox)
@@ -79,8 +78,13 @@ Then install the resulting `.vsix` file using the command palette and selecting
 
 ## Extension Commands
 
-* `python-tox.select`: Show a menu allowing to pick a tox environment.
-* `python-tox.selectMultiple`: Show a menu allowing to pick multiple tox environments.
+- `python-tox.select`: Show a menu allowing to pick a tox environment.
+- `python-tox.selectMultiple`: Show a menu allowing to pick multiple tox environments.
+
+## Recommended Extensions
+
+- [Ini for VSCode](https://marketplace.visualstudio.com/items?itemName=DavidWang.ini-for-vscode) for simpler navigation of large tox.ini files
+- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) for EsLint integration into VSCode
 
 ## Release Notes
 
