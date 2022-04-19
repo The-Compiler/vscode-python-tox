@@ -3,11 +3,13 @@ import * as child_process from 'child_process';
 import * as util from 'util';
 import * as path from 'path';
 import * as os from 'os';
+import { VsCodeWindow } from './abstraction/window';
 
 const exec = util.promisify(child_process.exec);
+const window = new VsCodeWindow();
 
 function findProjectDir() {
-	const docUri = vscode.window.activeTextEditor?.document.uri;
+	const docUri = window.activeTextEditor?.document.uri;
 	if (!docUri) {
 		throw new Error("No active editor found.");
 	}
@@ -34,13 +36,13 @@ async function safeGetToxEnvs(projDir: string) {
 	try {
 		return await getToxEnvs(projDir);
 	} catch (error) {
-		vscode.window.showErrorMessage((error as Error).message);
+		window.showErrorMessage((error as Error).message);
 		return;
 	}
 }
 
 function runTox(envs: string[], projDir: string) {
-	const term = vscode.window.createTerminal({"cwd": projDir, "name": "tox"});
+	const term = window.createTerminal({"cwd": projDir, "name": "tox"});
 	const envArg = envs.join(",");
 	term.show(true);  // preserve focus
 
@@ -65,7 +67,7 @@ async function selectCommand() {
 	if (!envs) {
 		return;
 	}
-	const selected = await vscode.window.showQuickPick(envs, {placeHolder: "tox environment"});
+	const selected = (await window.showQuickPick(envs, {placeHolder: "tox environment"})) as string;
 	if (!selected) {
 		return;
 	}
@@ -78,7 +80,7 @@ async function selectMultipleCommand() {
 	if (!envs) {
 		return;
 	}
-	const selected = await vscode.window.showQuickPick(envs, {placeHolder: "tox environments", canPickMany: true});
+	const selected = (await window.showQuickPick(envs, {placeHolder: "tox environments", canPickMany: true})) as string[];
 	if (!selected) {
 		return;
 	}
