@@ -76,7 +76,7 @@ suite('Extension Test Suite', () => {
     let mockedTextDocument : vscode.TextDocument = mock<vscode.TextDocument>();
 
     // stub method before execution
-		const exampleDir = getExampleDir("simple");
+		const exampleDir = getExampleDir("envvars");
 		const toxIniPath = path.join(exampleDir, 'tox.ini');
     const toxIniContent = fs.readFileSync(toxIniPath,'utf8');
     when(mockedTextDocument.getText()).thenReturn(toxIniContent);
