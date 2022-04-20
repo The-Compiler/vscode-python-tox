@@ -5,7 +5,7 @@ import { env, Uri } from "vscode";
  * used in this extension
  */
 export class VsCodeEnv {
-    public openExternal(target: Uri): Thenable<boolean> {
-        return env.openExternal(target);
+    public openExternal(target: string): Thenable<boolean> {
+        return env.openExternal(Uri.parse(target));
     }
 }

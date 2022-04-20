@@ -1,114 +1,48 @@
-import * as vscode from 'vscode';
-import * as child_process from 'child_process';
-import * as util from 'util';
-import * as path from 'path';
-import * as os from 'os';
+import { ExtensionContext, Uri } from 'vscode';
+
+import { Commands } from './constants';
 import { VsCodeWindow } from './abstraction/window';
 import { VsCodeWorkspace } from './abstraction/workspace';
 import { VsCodeEnv } from './abstraction/environment';
 import { VsCodeCommands } from './abstraction/commands';
+import { RunToxService } from './service/runToxService';
+import { UtilityService } from './service/utilityService';
 
-const exec = util.promisify(child_process.exec);
-const window = new VsCodeWindow();
-const workspace = new VsCodeWorkspace();
-const environment = new VsCodeEnv();
-const commands = new VsCodeCommands();
+// abstraction layer
+let commands: VsCodeCommands;
 
-function findProjectDir() {
-	const docUri = window.activeTextEditor?.document.uri;
-	if (!docUri) {
-		throw new Error("No active editor found.");
-	}
+// services
+let runToxService: RunToxService;
+let utilityService: UtilityService;
 
-	const localWorkspace = workspace.getWorkspaceFolder(docUri);
-	if (localWorkspace) {
-		const folder = localWorkspace.uri.fsPath;
-		console.log(`tox workspace folder: ${folder}`);
-		return folder;
-	}
+/**
+ * Initialize the extension abstraction layer and the 
+ * relevant services
+ */
+function initialize() {
+	commands = new VsCodeCommands();
 
-	const docPath = docUri.fsPath;
-	const docDir = path.dirname(docPath);
-	console.log(`tox doc path: ${docPath} -> ${docDir}`);
-	return docDir;
+	runToxService = new RunToxService(new VsCodeWindow(), new VsCodeWorkspace());
+	utilityService = new UtilityService(new VsCodeEnv());
 }
 
-async function getToxEnvs(projDir: string) {
-	const { stdout } = await exec('tox -a', {cwd: projDir});
-	return stdout.trim().split(os.EOL);
-}
+/**
+ * Function is called on extension activation
+ * @param context 
+ */
+export function activate(context: ExtensionContext) {
 
-async function safeGetToxEnvs(projDir: string) {
-	try {
-		return await getToxEnvs(projDir);
-	} catch (error) {
-		window.showErrorMessage((error as Error).message);
-		return;
-	}
-}
+	initialize();
 
-function runTox(envs: string[], projDir: string) {
-	const term = window.createTerminal({"cwd": projDir, "name": "tox"});
-	const envArg = envs.join(",");
-	term.show(true);  // preserve focus
-
-	// FIXME In theory, there's a command injection here, if an environment name
-	// contains shell metacharacters. However:
-	// - Escaping the argument in a shell-agnostic way is hard:
-	//   https://github.com/microsoft/vscode/blob/1.57.0/src/vs/workbench/contrib/debug/node/terminals.ts#L84-L211
-	// - The environment names are coming from the tox config via "tox -l", so
-	//   if someone could configure a malicious environment, they could as well
-	//   just tell tox to run malicious commands.
-	// - We don't run on untrusted workspaces.
-	// - The user actively picks the environment name to be run.
-	// - Real tox environment names are very unlikely to accidentally contain
-	//   such characters - in fact, using spaces in env names seems to not work
-	//   properly at all.
-	term.sendText(`tox -e ${envArg}`);
-}
-
-async function selectCommand() {
-	const projDir = findProjectDir();
-	const envs = await safeGetToxEnvs(projDir);
-	if (!envs) {
-		return;
-	}
-	const selected = (await window.showQuickPick(envs, {placeHolder: "tox environment"})) as string;
-	if (!selected) {
-		return;
-	}
-	runTox([selected], projDir);
-}
-
-async function selectMultipleCommand() {
-	const projDir = findProjectDir();
-	const envs = await safeGetToxEnvs(projDir);
-	if (!envs) {
-		return;
-	}
-	const selected = (await window.showQuickPick(envs, {placeHolder: "tox environments", canPickMany: true})) as string[];
-	if (!selected) {
-		return;
-	}
-	runTox(selected, projDir);
-}
-
-async function openDocumentationCommand() {
-	environment.openExternal(vscode.Uri.parse("https://tox.wiki"));
-}
-
-export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
-		commands.registerCommand('python-tox.select', selectCommand),
-		commands.registerCommand('python-tox.selectMultiple', selectMultipleCommand),
-		commands.registerCommand('python-tox.openDocs', openDocumentationCommand)
+		commands.registerCommand(Commands.select, () => runToxService.runSingle()),
+		commands.registerCommand(Commands.selectMultiple, () => runToxService.runMultiple()),
+		commands.registerCommand(Commands.openDocs, () => utilityService.openExternalUrl("https://tox.wiki"))
 	);
 }
 
+/**
+ * Function is called on extension deactivation
+ */
 export function deactivate() {}
 
-// For testing, before we move this to a utils.ts
-export const _private = {
-	getToxEnvs,
-	runTox,
-};
