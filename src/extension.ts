@@ -4,9 +4,15 @@ import * as util from 'util';
 import * as path from 'path';
 import * as os from 'os';
 import { VsCodeWindow } from './abstraction/window';
+import { VsCodeWorkspace } from './abstraction/workspace';
+import { VsCodeEnv } from './abstraction/environment';
+import { VsCodeCommands } from './abstraction/commands';
 
 const exec = util.promisify(child_process.exec);
 const window = new VsCodeWindow();
+const workspace = new VsCodeWorkspace();
+const environment = new VsCodeEnv();
+const commands = new VsCodeCommands();
 
 function findProjectDir() {
 	const docUri = window.activeTextEditor?.document.uri;
@@ -14,9 +20,9 @@ function findProjectDir() {
 		throw new Error("No active editor found.");
 	}
 
-	const workspace = vscode.workspace.getWorkspaceFolder(docUri);
-	if (workspace) {
-		const folder = workspace.uri.fsPath;
+	const localWorkspace = workspace.getWorkspaceFolder(docUri);
+	if (localWorkspace) {
+		const folder = localWorkspace.uri.fsPath;
 		console.log(`tox workspace folder: ${folder}`);
 		return folder;
 	}
@@ -88,14 +94,14 @@ async function selectMultipleCommand() {
 }
 
 async function openDocumentationCommand() {
-	vscode.env.openExternal(vscode.Uri.parse("https://tox.wiki"));
+	environment.openExternal(vscode.Uri.parse("https://tox.wiki"));
 }
 
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
-		vscode.commands.registerCommand('python-tox.select', selectCommand),
-		vscode.commands.registerCommand('python-tox.selectMultiple', selectMultipleCommand),
-		vscode.commands.registerCommand('python-tox.openDocs', openDocumentationCommand)
+		commands.registerCommand('python-tox.select', selectCommand),
+		commands.registerCommand('python-tox.selectMultiple', selectMultipleCommand),
+		commands.registerCommand('python-tox.openDocs', openDocumentationCommand)
 	);
 }
 
