@@ -3,4 +3,5 @@ dist
 node_modules
 .vscode-test/
 *.vsix
-src/test/examples/*/.tox
+.venv
+**/.tox

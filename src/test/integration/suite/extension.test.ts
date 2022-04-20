@@ -3,13 +3,13 @@ import { strict as assert } from 'assert';
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from 'vscode';
-import * as extension from '../../extension';
+import * as extension from '../../../extension';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as util from 'util';
 
 function getExampleDir(name: string) {
-	const dir = path.join(__dirname, '..', '..', '..', 'src', 'test', 'examples', name);
+	const dir = path.join(__dirname, '..', '..', '..', '..', 'src', 'test', 'integration', 'examples', name);
 	assert.ok(fs.existsSync(dir));
 	return dir;
 }
