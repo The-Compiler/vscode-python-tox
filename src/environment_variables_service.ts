@@ -1,14 +1,15 @@
 import * as vscode from 'vscode';
 
 export class EnvironmentVariablesService implements vscode.HoverProvider {
+
   public provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
-    this.collectEnvironmentVariables(document);
+    this.updateEnvironmentVariables(document);
     return {
       contents: this.generateHoverMessage(document, position)
     };
   }
 
-  public collectEnvironmentVariables(document: vscode.TextDocument): Map<string, string> {
+  public updateEnvironmentVariables(document: vscode.TextDocument): Map<string, string> {
     // Regular expression and code based on https://regex101.com/r/Yn6dAs/1.
     const regex = /(^(?<key>passenv)(?: |)*=(?: |)*(?<value>[^#;\\\r\n]*(?:\\.[^#;\\\r\n]*)*))/gm;
 

@@ -82,7 +82,7 @@ suite('Extension Test Suite', () => {
     when(mockedTextDocument.getText()).thenReturn(toxIniContent);
 
 		const environmentVariablesService = new EnvironmentVariablesService();
-    let result = environmentVariablesService.collectEnvironmentVariables(instance(mockedTextDocument));
+    let result = environmentVariablesService.updateEnvironmentVariables(instance(mockedTextDocument));
 
     assert.equal(result.get("passenv"), "PARENT_ENV_VAR");
 		
