@@ -84,7 +84,8 @@ suite('Extension Test Suite', () => {
 		const environmentVariablesService = new EnvironmentVariablesService();
     let result = environmentVariablesService.updateEnvironmentVariables(instance(mockedTextDocument));
 
-    assert.equal(result.get("passenv"), "PARENT_ENV_VAR");
+		assert.equal(result, true);
+    assert.equal(environmentVariablesService.environmentVariables.get("passenv"), "PARENT_ENV_VAR");
 		
     verify(mockedTextDocument.getText()).called();
 	});
