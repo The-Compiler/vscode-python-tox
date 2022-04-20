@@ -6,7 +6,8 @@ import * as vscode from 'vscode';
 import * as extension from '../../extension';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as util from 'util';
+import { EnvironmentVariablesService } from '../../environment_variables_service';
+import {mock, verify, instance, when} from 'ts-mockito';
 
 function getExampleDir(name: string) {
 	const dir = path.join(__dirname, '..', '..', '..', 'src', 'test', 'examples', name);
@@ -70,4 +71,21 @@ suite('Extension Test Suite', () => {
 		await waitForMarker(tmpdir);
 		assert.ok(fs.existsSync(marker));
 	});
+
+	test('collect environment variables', async () => {
+    let mockedTextDocument : vscode.TextDocument = mock<vscode.TextDocument>();
+
+    // stub method before execution
+		const exampleDir = getExampleDir("simple");
+		const toxIniPath = path.join(exampleDir, 'tox.ini');
+    const toxIniContent = fs.readFileSync(toxIniPath,'utf8');
+    when(mockedTextDocument.getText()).thenReturn(toxIniContent);
+
+    let result = EnvironmentVariablesService.collectEnvironmentVariables(instance(mockedTextDocument));
+
+    assert.equal(result.get("passenv"), "PARENT_ENV_VAR");
+		
+    verify(mockedTextDocument.getText()).called();
+	});
+
 });
