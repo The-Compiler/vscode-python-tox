@@ -81,7 +81,8 @@ suite('Extension Test Suite', () => {
     const toxIniContent = fs.readFileSync(toxIniPath,'utf8');
     when(mockedTextDocument.getText()).thenReturn(toxIniContent);
 
-    let result = EnvironmentVariablesService.collectEnvironmentVariables(instance(mockedTextDocument));
+		const environmentVariablesService = new EnvironmentVariablesService();
+    let result = environmentVariablesService.collectEnvironmentVariables(instance(mockedTextDocument));
 
     assert.equal(result.get("passenv"), "PARENT_ENV_VAR");
 		

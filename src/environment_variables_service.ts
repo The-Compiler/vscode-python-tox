@@ -1,19 +1,14 @@
 import * as vscode from 'vscode';
 
-export class EnvironmentVariablesService {
-
-  public static createHoverProvider(): vscode.HoverProvider {
+export class EnvironmentVariablesService implements vscode.HoverProvider {
+  public provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
+    this.collectEnvironmentVariables(document);
     return {
-      provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
-        EnvironmentVariablesService.collectEnvironmentVariables(document);
-        return {
-          contents: [`Hover Content in '${document.fileName}' at line ${position.line} char ${position.character}`]
-        };
-      }
+      contents: this.generateHoverMessage(document, position)
     };
   }
 
-  public static collectEnvironmentVariables(document: vscode.TextDocument): Map<string, string> {
+  public collectEnvironmentVariables(document: vscode.TextDocument): Map<string, string> {
     // Regular expression and code based on https://regex101.com/r/Yn6dAs/1.
     const regex = /(^(?<key>passenv)(?: |)*=(?: |)*(?<value>[^#;\\\r\n]*(?:\\.[^#;\\\r\n]*)*))/gm;
 
@@ -24,10 +19,17 @@ export class EnvironmentVariablesService {
     let match = regex.exec(documentText);
 
     if (match && match.groups) {
-        environmentVariables.set(match.groups.key, match.groups.value);
+      environmentVariables.set(match.groups.key, match.groups.value);
     }
 
     return environmentVariables;
   }
 
+  private generateHoverMessage(document: vscode.TextDocument, position: vscode.Position): vscode.MarkdownString[] {
+    const hoverMessage = new vscode.MarkdownString(`Hover Content in '${document.fileName}' at line ${position.line} char ${position.character}`);
+
+    return [hoverMessage];
+  }
+
 }
+

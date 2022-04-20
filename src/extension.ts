@@ -91,11 +91,13 @@ async function openDocumentationCommand() {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+	const environmentVariablesService = new EnvironmentVariablesService();
+
 	context.subscriptions.push(
 		vscode.commands.registerCommand('python-tox.select', selectCommand),
 		vscode.commands.registerCommand('python-tox.selectMultiple', selectMultipleCommand),
 		vscode.commands.registerCommand('python-tox.openDocs', openDocumentationCommand),
-		vscode.languages.registerHoverProvider(['ini'], EnvironmentVariablesService.createHoverProvider())
+		vscode.languages.registerHoverProvider(['ini'], environmentVariablesService)
 	);
 
 }
