@@ -6,7 +6,7 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
 
   public provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
 
-    this.updateEnvironmentVariables(document);
+    this.updateAllEnvironmentVariables(document);
     const hoverMessage = this.generateHoverMessage(document, position);
 
     if (hoverMessage) {
@@ -27,20 +27,44 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
    * @param document The document to search for environments variables.
    * @returns true if environment variables have been found; false otherwise.
    */
-  public updateEnvironmentVariables(document: vscode.TextDocument): boolean {
-    // Regular expression and code based on https://regex101.com/r/Yn6dAs/1.
-    const regex = /(^(?<key>passenv)(?: |)*=(?: |)*(?<value>[^#;\\\r\n]*(?:\\.[^#;\\\r\n]*)*))/gm;
+  public updateAllEnvironmentVariables(document: vscode.TextDocument): boolean {
+
+    this.environmentVariables.clear();
+
+    const resultPassEnv = this.updateEnvironmentVariables(document, "passenv");
+    const resultSetEnv = this.updateEnvironmentVariables(document, "setenv");
+
+    return resultPassEnv || resultSetEnv;
+  }
+
+  public updateEnvironmentVariables(document: vscode.TextDocument, source: string): boolean {
+    if ((source !== "passenv") && (source !== "setenv")) {
+      throw new RangeError("Argument 'envVarMethod' can only be set to 'passenv' or 'setenv'. ");
+    }
+
+    const regex = new RegExp(`(^(?<key>${source})(?: |)*=(?: |)*(?<value>[^#;\\\r\n]*(?:\\.[^#;\\\r\n]*)*))`, "gm");
 
     const documentText: string = document.getText();
 
     let match = regex.exec(documentText);
 
-    this.environmentVariables.clear();
-
     if (match && match.groups) {
 
-      const envVarName = match.groups.value;
-      const envVarValue = process.env[envVarName] ?? "environment variable not found";
+      let envVarName = match.groups.value;
+      let envVarValue: string;
+
+      if (source === "passenv") {
+
+        envVarValue = this.resolvePassEnvValue(envVarName);
+
+      } else {  // setenv
+
+        const resolvedSetEnv = this.resolveSetEnvValue(envVarName);
+
+        envVarName = resolvedSetEnv.name;
+        envVarValue = resolvedSetEnv.value;
+
+      }
 
       this.environmentVariables.set(envVarName, envVarValue);
 
@@ -53,6 +77,36 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
       return false;
 
     }
+  }
+
+  public resolvePassEnvValue(passEnvVarName: string): string {
+    const envVarValue = process.env[passEnvVarName] ?? "n/a";
+
+    return envVarValue;
+  }
+
+  public resolveSetEnvValue(setEnvVar: string) {
+    const regex = /(^( +|)(?<key>[^\[\]\r\n=#;]+)(?: |)*=( |)*(?<value>[^#;\\\r\n]*(?:\\.[^#;\\\r\n]*)*))/gm;
+
+    let match = regex.exec(setEnvVar);
+
+    let envVarName: string;
+    let envVarValue: string;
+
+    if (match && match.groups) {
+
+      envVarName = match.groups.key.trim();
+      envVarValue = match.groups.value.trim();
+
+    } else {
+
+      envVarName = setEnvVar;
+      envVarValue = "n/a";
+
+    }
+
+
+    return {name: envVarName, value: envVarValue};
   }
 
   public generateHoverMessage(document: vscode.TextDocument, position: vscode.Position): vscode.MarkdownString[] | null {
@@ -94,4 +148,3 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
   }
 
 }
-

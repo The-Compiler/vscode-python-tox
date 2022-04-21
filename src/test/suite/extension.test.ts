@@ -81,31 +81,6 @@ suite('Extension Test Suite', () => {
 		assert.ok(fs.existsSync(marker));
 	});
 
-	test('update environment variables', async () => {
-		// Arrange
-
-		// A text document containing a sample tox.ini file.
-		let mockedTextDocument: vscode.TextDocument = mock<vscode.TextDocument>();
-		const toxIniContent = getSampleToxContent("envvars");
-		when(mockedTextDocument.getText()).thenReturn(toxIniContent);
-
-		const testEnvVarName = "PASSENV_ENV_VAR_TEST";
-		const testEnvVarValue = "Test Value 01";
-		process.env["PASSENV_ENV_VAR_TEST"] = testEnvVarValue;
-
-		// Act
-
-		const environmentVariablesService = new EnvironmentVariablesService();
-		let result = environmentVariablesService.updateEnvironmentVariables(instance(mockedTextDocument));
-
-		// Assert
-
-		assert.equal(result, true);
-		assert.equal(environmentVariablesService.environmentVariables.get(testEnvVarName), testEnvVarValue);
-
-		verify(mockedTextDocument.getText()).called();
-	});
-
 	test('get NO hover message on NO env var position', async () => {
 		// Arrange
 
@@ -120,7 +95,7 @@ suite('Extension Test Suite', () => {
 		// Act
 
 		const environmentVariablesService = new EnvironmentVariablesService();
-		let resultUpdate = environmentVariablesService.updateEnvironmentVariables(textDocument);
+		let resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
 		let hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
 
 		// Assert
@@ -129,7 +104,7 @@ suite('Extension Test Suite', () => {
 		assert.equal(hoverMessage, null, 'For the given position NO hover message should have been returned.');
 	});
 
-	test('get hover message on env var position', async () => {
+	test('get hover message on passenv var position', async () => {
 		// Arrange
 		// A text document containing a sample tox.ini file.
 		const toxIniPath = getExampleToxIniPath("envvars");
@@ -137,16 +112,12 @@ suite('Extension Test Suite', () => {
 
 		// A position which DOES reference a variable set by passenv or setenv.
 		// Properties line and character in Position are zero-based, VS Code UI is one-based.
-		const position = new vscode.Position(10, 18);
-
-		const testEnvVarName = "PASSENV_ENV_VAR_TEST";
-		const testEnvVarValue = "Test Value 01";
-		process.env["PASSENV_ENV_VAR_TEST"] = testEnvVarValue;
+		const position = new vscode.Position(11, 13);
 
 		// Act
 
 		const environmentVariablesService = new EnvironmentVariablesService();
-		let resultUpdate = environmentVariablesService.updateEnvironmentVariables(textDocument);
+		let resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
 		let hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
 
 		// Assert
@@ -154,8 +125,37 @@ suite('Extension Test Suite', () => {
 		assert.equal(resultUpdate, true, 'Environment variables in the sample tox.ini file should have been found.');
 		assert.notEqual(hoverMessage, null);
 
-		const expectedHoverMessage = `${testEnvVarName}: '${testEnvVarValue}'`;
+		const testPassEnvName = "PWD";
+		const testPassEnvValue = process.env[testPassEnvName];
+		const expectedHoverMessage = `${testPassEnvName}: '${testPassEnvValue}'`;
+
 		assert.equal(hoverMessage && hoverMessage[0].value, expectedHoverMessage, `For the given position the expected hover message is: '${expectedHoverMessage}'.`);
 	});
+
+	test('get hover message on setenv var position', async () => {
+		// Arrange
+		// A text document containing a sample tox.ini file.
+		const toxIniPath = getExampleToxIniPath("envvars");
+		const textDocument = await vscode.workspace.openTextDocument(toxIniPath);
+
+		// A position which DOES reference a variable set by passenv or setenv.
+		// Properties line and character in Position are zero-based, VS Code UI is one-based.
+		const position = new vscode.Position(12, 20);
+
+		// Act
+
+		const environmentVariablesService = new EnvironmentVariablesService();
+		let resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
+		let hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
+
+		// Assert
+
+		assert.equal(resultUpdate, true, 'Environment variables in the sample tox.ini file should have been found.');
+		assert.notEqual(hoverMessage, null);
+
+		const expectedHoverMessage = "LOCALUI_OUTPUT_PATH: './tests/.output'";
+		assert.equal(hoverMessage && hoverMessage[0].value, expectedHoverMessage, `For the given position the expected hover message is: '${expectedHoverMessage}'.`);
+	});
+
 
 });
