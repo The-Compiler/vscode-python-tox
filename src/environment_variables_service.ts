@@ -40,7 +40,7 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
     if (match && match.groups) {
 
       const envVarName = match.groups.value;
-      const envVarValue = process.env[envVarName] ?? "";
+      const envVarValue = process.env[envVarName] ?? "environment variable not found";
 
       this.environmentVariables.set(envVarName, envVarValue);
 
@@ -51,7 +51,7 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
 
       // Indicate NO environment variables have been found.
       return false;
-      
+
     }
   }
 
@@ -62,6 +62,8 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
     if (keyValuePair) {
 
       const hoverMessage = new vscode.MarkdownString(`${keyValuePair.key}: '${keyValuePair.value}'`);
+
+      console.log(`hover message: ${hoverMessage.value}`);
 
       return [hoverMessage];
 

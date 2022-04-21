@@ -1,5 +1,3 @@
-import { strict as assert } from 'assert';
-
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from 'vscode';
@@ -8,6 +6,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { EnvironmentVariablesService } from '../../environment_variables_service';
 import { mock, verify, instance, when } from 'ts-mockito';
+import { strict as assert } from 'assert';
 
 function getExampleDir(name: string) {
 	const dir = path.join(__dirname, '..', '..', '..', 'src', 'test', 'examples', name);
@@ -151,7 +150,7 @@ suite('Extension Test Suite', () => {
 		let hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
 
 		// Assert
-		
+
 		assert.equal(resultUpdate, true, 'Environment variables in the sample tox.ini file should have been found.');
 		assert.notEqual(hoverMessage, null);
 
