@@ -5,10 +5,21 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
   public environmentVariables = new Map<string, string>();
 
   public provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
+
     this.updateEnvironmentVariables(document);
-    return {
-      contents: this.generateHoverMessage(document, position)
-    };
+    const hoverMessage = this.generateHoverMessage(document, position);
+
+    if (hoverMessage) {
+
+      return {
+        contents: hoverMessage
+      };
+
+    } else {
+
+      return null;
+
+    }
   }
 
   /**
@@ -27,20 +38,57 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
     this.environmentVariables.clear();
 
     if (match && match.groups) {
-      this.environmentVariables.set(match.groups.key, match.groups.value);
+
+      const envVarName = match.groups.value;
+      const envVarValue = process.env[envVarName] ?? "";
+
+      this.environmentVariables.set(envVarName, envVarValue);
 
       // Indicate environment variables have been found.
       return true;
+
     } else {
+
       // Indicate NO environment variables have been found.
       return false;
+      
     }
   }
 
-  private generateHoverMessage(document: vscode.TextDocument, position: vscode.Position): vscode.MarkdownString[] {
-    const hoverMessage = new vscode.MarkdownString(`Hover Content in '${document.fileName}' at line ${position.line} char ${position.character}`);
+  public generateHoverMessage(document: vscode.TextDocument, position: vscode.Position): vscode.MarkdownString[] | null {
 
-    return [hoverMessage];
+    const keyValuePair = this.getKeyValue(document, position);
+
+    if (keyValuePair) {
+
+      const hoverMessage = new vscode.MarkdownString(`${keyValuePair.key}: '${keyValuePair.value}'`);
+
+      return [hoverMessage];
+
+    } else {
+
+      return null;
+
+    }
+  }
+
+  public getKeyValue(document: vscode.TextDocument, position: vscode.Position) {
+    const range = document.getWordRangeAtPosition(position);
+    const wordAtPosition = document.getText(range);
+
+    console.log(`Word '${wordAtPosition}' at position (${position.line}, ${position.character}) with range from (${range?.start.line}, ${range?.start.character}) to (${range?.end.line}, ${range?.end.character})`);
+
+    const value = this.environmentVariables.get(wordAtPosition);
+
+    if (value) {
+
+      return { key: wordAtPosition, value: value };
+
+    } else {
+
+      return null;
+
+    }
   }
 
 }

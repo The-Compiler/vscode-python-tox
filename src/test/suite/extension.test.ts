@@ -7,7 +7,7 @@ import * as extension from '../../extension';
 import * as path from 'path';
 import * as fs from 'fs';
 import { EnvironmentVariablesService } from '../../environment_variables_service';
-import {mock, verify, instance, when} from 'ts-mockito';
+import { mock, verify, instance, when } from 'ts-mockito';
 
 function getExampleDir(name: string) {
 	const dir = path.join(__dirname, '..', '..', '..', 'src', 'test', 'examples', name);
@@ -15,11 +15,21 @@ function getExampleDir(name: string) {
 	return dir;
 }
 
-function getExampleFileUri(name: string, file: string) {
-	const dir = getExampleDir(name);
-	const filePath = path.join(dir, file);
-	assert.ok(fs.existsSync(filePath));
-	return vscode.Uri.file(filePath);
+function getExampleToxIniPath(sampleName: string): string {
+	// Build path to tox.ini file.
+	const exampleDir = getExampleDir(sampleName);
+	const toxIniPath = path.join(exampleDir, 'tox.ini');
+
+	return toxIniPath;
+}
+
+function getSampleToxContent(sampleName: string): string {
+	const toxIniPath = getExampleToxIniPath(sampleName);
+
+	// Read tox.ini file.
+	const toxIniContent = fs.readFileSync(toxIniPath, 'utf8');
+
+	return toxIniContent;
 }
 
 async function waitForTerminal() {
@@ -61,8 +71,8 @@ suite('Extension Test Suite', () => {
 
 		const tmpdir = path.join(dir, ".tox", "tmp");
 		const marker = path.join(tmpdir, "tox-did-run");
-		fs.mkdirSync(tmpdir, {recursive: true});
-		fs.rmSync(marker, {force: true});
+		fs.mkdirSync(tmpdir, { recursive: true });
+		fs.rmSync(marker, { force: true });
 
 		await extension._private.runTox(["test"], dir);
 		const terminal = await waitForTerminal();
@@ -72,22 +82,81 @@ suite('Extension Test Suite', () => {
 		assert.ok(fs.existsSync(marker));
 	});
 
-	test('collect environment variables', async () => {
-    let mockedTextDocument : vscode.TextDocument = mock<vscode.TextDocument>();
+	test('update environment variables', async () => {
+		// Arrange
 
-    // stub method before execution
-		const exampleDir = getExampleDir("envvars");
-		const toxIniPath = path.join(exampleDir, 'tox.ini');
-    const toxIniContent = fs.readFileSync(toxIniPath,'utf8');
-    when(mockedTextDocument.getText()).thenReturn(toxIniContent);
+		// A text document containing a sample tox.ini file.
+		let mockedTextDocument: vscode.TextDocument = mock<vscode.TextDocument>();
+		const toxIniContent = getSampleToxContent("envvars");
+		when(mockedTextDocument.getText()).thenReturn(toxIniContent);
+
+		const testEnvVarName = "PASSENV_ENV_VAR_TEST";
+		const testEnvVarValue = "Test Value 01";
+		process.env["PASSENV_ENV_VAR_TEST"] = testEnvVarValue;
+
+		// Act
 
 		const environmentVariablesService = new EnvironmentVariablesService();
-    let result = environmentVariablesService.updateEnvironmentVariables(instance(mockedTextDocument));
+		let result = environmentVariablesService.updateEnvironmentVariables(instance(mockedTextDocument));
+
+		// Assert
 
 		assert.equal(result, true);
-    assert.equal(environmentVariablesService.environmentVariables.get("passenv"), "PARENT_ENV_VAR");
+		assert.equal(environmentVariablesService.environmentVariables.get(testEnvVarName), testEnvVarValue);
+
+		verify(mockedTextDocument.getText()).called();
+	});
+
+	test('get NO hover message on NO env var position', async () => {
+		// Arrange
+
+		// A text document containing a sample tox.ini file.
+		const toxIniPath = getExampleToxIniPath("envvars");
+		const textDocument = await vscode.workspace.openTextDocument(toxIniPath);
+
+		// A position which DOES NOT reference a variable set by passenv or setenv.
+		// Properties line and character in Position are zero-based, VS Code UI is one-based.
+		const position = new vscode.Position(1, 4);
+
+		// Act
+
+		const environmentVariablesService = new EnvironmentVariablesService();
+		let resultUpdate = environmentVariablesService.updateEnvironmentVariables(textDocument);
+		let hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
+
+		// Assert
+
+		assert.equal(resultUpdate, true, 'Environment variables in the sample tox.ini file should have been found.');
+		assert.equal(hoverMessage, null, 'For the given position NO hover message should have been returned.');
+	});
+
+	test('get hover message on env var position', async () => {
+		// Arrange
+		// A text document containing a sample tox.ini file.
+		const toxIniPath = getExampleToxIniPath("envvars");
+		const textDocument = await vscode.workspace.openTextDocument(toxIniPath);
+
+		// A position which DOES reference a variable set by passenv or setenv.
+		// Properties line and character in Position are zero-based, VS Code UI is one-based.
+		const position = new vscode.Position(10, 18);
+
+		const testEnvVarName = "PASSENV_ENV_VAR_TEST";
+		const testEnvVarValue = "Test Value 01";
+		process.env["PASSENV_ENV_VAR_TEST"] = testEnvVarValue;
+
+		// Act
+
+		const environmentVariablesService = new EnvironmentVariablesService();
+		let resultUpdate = environmentVariablesService.updateEnvironmentVariables(textDocument);
+		let hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
+
+		// Assert
 		
-    verify(mockedTextDocument.getText()).called();
+		assert.equal(resultUpdate, true, 'Environment variables in the sample tox.ini file should have been found.');
+		assert.notEqual(hoverMessage, null);
+
+		const expectedHoverMessage = `${testEnvVarName}: '${testEnvVarValue}'`;
+		assert.equal(hoverMessage && hoverMessage[0].value, expectedHoverMessage, `For the given position the expected hover message is: '${expectedHoverMessage}'.`);
 	});
 
 });
