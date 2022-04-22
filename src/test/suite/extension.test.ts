@@ -95,8 +95,8 @@ suite('Extension Test Suite', () => {
 		// Act
 
 		const environmentVariablesService = new EnvironmentVariablesService();
-		let resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
-		let hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
+		const resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
+		const hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
 
 		// Assert
 
@@ -117,8 +117,8 @@ suite('Extension Test Suite', () => {
 		// Act
 
 		const environmentVariablesService = new EnvironmentVariablesService();
-		let resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
-		let hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
+		const resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
+		const hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
 
 		// Assert
 
@@ -145,8 +145,8 @@ suite('Extension Test Suite', () => {
 		// Act
 
 		const environmentVariablesService = new EnvironmentVariablesService();
-		let resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
-		let hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
+		const resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
+		const hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
 
 		// Assert
 
@@ -170,8 +170,8 @@ suite('Extension Test Suite', () => {
 		// Act
 
 		const environmentVariablesService = new EnvironmentVariablesService();
-		let resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
-		let hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
+		const resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
+		const hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
 
 		// Assert
 
@@ -180,6 +180,42 @@ suite('Extension Test Suite', () => {
 
 		const expectedHoverMessage = "FILE_ENV_VAR_02: 'value_02'";
 		assert.equal(hoverMessage && hoverMessage[0].value, expectedHoverMessage, `For the given position the expected hover message is: '${expectedHoverMessage}'.`);
+	});
+
+
+	test('determine section at position in tox file', async () => {
+		// Arrange
+		// A text document containing a sample tox.ini file.
+		const toxIniPath = getExampleToxIniPath("envvars");
+		const textDocument = await vscode.workspace.openTextDocument(toxIniPath);
+
+		// A position which DOES reference a variable set by passenv or setenv.
+		// Properties line and character in Position are zero-based, VS Code UI is one-based.
+		const position1 = new vscode.Position(10, 10);	// section testenv:single_values
+		const position2 = new vscode.Position(20, 20);	// section testenv:file_reference
+		const position3 = new vscode.Position(5, 15);	// in the middle of section name testenv:single_values
+		const position4 = new vscode.Position(100, 100);	// outside of document scope
+
+		// Act
+
+		const environmentVariablesService = new EnvironmentVariablesService();
+		const sectionName1 = environmentVariablesService.determineSection(textDocument, position1);
+		const sectionName2 = environmentVariablesService.determineSection(textDocument, position2);
+		const sectionName3 = environmentVariablesService.determineSection(textDocument, position3);
+		const sectionName4 = environmentVariablesService.determineSection(textDocument, position4);
+
+		// Assert
+
+		const expectedSectionName1 = 'testenv:single_values';
+		const expectedSectionName2 = 'testenv:file_reference';
+		const expectedSectionName3 = 'testenv:single_values';
+		const expectedSectionName4 = 'testenv:file_reference';
+
+		assert.equal(sectionName1, expectedSectionName1, `For the given position the expected section name is: '${expectedSectionName1}'.`);
+		assert.equal(sectionName2, expectedSectionName2, `For the given position the expected section name is: '${expectedSectionName2}'.`);
+		assert.equal(sectionName3, expectedSectionName3, `For the given position the expected section name is: '${expectedSectionName3}'.`);
+		assert.equal(sectionName4, expectedSectionName4, `For the given position the expected section name is: '${expectedSectionName4}'.`);
+
 	});
 
 });

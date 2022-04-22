@@ -73,15 +73,15 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
           const fileReferencePrefix = 'file|';
 
           if (envVarValue.startsWith(fileReferencePrefix)) {
-      
+
             this.updateSetEnvFileReference(document, envVarValue.substring(fileReferencePrefix.length));
-      
+
           } else {  // direct value assignment
-      
+
             this.updateSetEnvDirectValue(envVarValue);
-      
+
           }
-      
+
         }
 
         // Indicate environment variables have been found.
@@ -186,6 +186,37 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
       return null;
 
     }
+  }
+
+  public determineSection(document: vscode.TextDocument, position: vscode.Position): string {
+
+    const positionStart = new vscode.Position(0,0);
+    const positionEnd = new vscode.Position(position.line + 1, 0);
+    const range = new vscode.Range(positionStart, positionEnd);
+    const documentText: string = document.getText(range);
+
+    const regex = /(?:^(?: +|)\[(?<section>[^#;\r\n]+)\])/mg;
+
+    let lastSectionName = "";
+
+    let match: RegExpExecArray | null;
+
+    while ((match = regex.exec(documentText)) !== null) {
+
+      // This is necessary to avoid infinite loops with zero-width matches
+      if (match.index === regex.lastIndex) {
+        regex.lastIndex++;
+      }
+
+      if (match && match.groups) {
+
+        lastSectionName = match.groups.section;
+
+      }
+    }
+
+    return lastSectionName;
+
   }
 
 }
