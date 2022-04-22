@@ -90,12 +90,12 @@ suite('Extension Test Suite', () => {
 
 		// A position which DOES NOT reference a variable set by passenv or setenv.
 		// Properties line and character in Position are zero-based, VS Code UI is one-based.
-		const position = new vscode.Position(1, 4);
+		const position = new vscode.Position(1, 4);	// point to a position without a variable name
 
 		// Act
 
 		const environmentVariablesService = new EnvironmentVariablesService();
-		const resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
+		const resultUpdate = environmentVariablesService.analyzeDocument(textDocument);
 		const hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
 
 		// Assert
@@ -112,12 +112,12 @@ suite('Extension Test Suite', () => {
 
 		// A position which DOES reference a variable set by passenv or setenv.
 		// Properties line and character in Position are zero-based, VS Code UI is one-based.
-		const position = new vscode.Position(11, 13);
+		const position = new vscode.Position(11, 13); // point to variable PWD in section testenv:single_values_01
 
 		// Act
 
 		const environmentVariablesService = new EnvironmentVariablesService();
-		const resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
+		const resultUpdate = environmentVariablesService.analyzeDocument(textDocument);
 		const hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
 
 		// Assert
@@ -140,21 +140,27 @@ suite('Extension Test Suite', () => {
 
 		// A position which DOES reference a variable set by passenv or setenv.
 		// Properties line and character in Position are zero-based, VS Code UI is one-based.
-		const position = new vscode.Position(12, 20);
+		const position1 = new vscode.Position(12, 20);	// point to variable LOCALUI_OUTPUT_PATH in section testenv:single_values_01
+		const position2 = new vscode.Position(16, 20);	// point to variable LOCALUI_OUTPUT_PATH in section testenv:single_values_02
 
 		// Act
 
 		const environmentVariablesService = new EnvironmentVariablesService();
-		const resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
-		const hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
+		const resultUpdate = environmentVariablesService.analyzeDocument(textDocument);
+
+		const hoverMessage1 = environmentVariablesService.generateHoverMessage(textDocument, position1);
+		const hoverMessage2 = environmentVariablesService.generateHoverMessage(textDocument, position2);
 
 		// Assert
 
 		assert.equal(resultUpdate, true, 'Environment variables in the sample tox.ini file should have been found.');
-		assert.notEqual(hoverMessage, null);
+		assert.notEqual(hoverMessage1, null);
 
-		const expectedHoverMessage = "LOCALUI_OUTPUT_PATH: './tests/.output'";
-		assert.equal(hoverMessage && hoverMessage[0].value, expectedHoverMessage, `For the given position the expected hover message is: '${expectedHoverMessage}'.`);
+		const expectedHoverMessage1 = "LOCALUI_OUTPUT_PATH: './tests/.output_01'";
+		assert.equal(hoverMessage1 && hoverMessage1[0].value, expectedHoverMessage1, `For the given position the expected hover message is: '${expectedHoverMessage1}'.`);
+
+		const expectedHoverMessage2 = "LOCALUI_OUTPUT_PATH: './tests/.output_02'";
+		assert.equal(hoverMessage2 && hoverMessage2[0].value, expectedHoverMessage2, `For the given position the expected hover message is: '${expectedHoverMessage2}'.`);
 	});
 
 	test('get hover message on setenv file reference var position', async () => {
@@ -165,12 +171,12 @@ suite('Extension Test Suite', () => {
 
 		// A position which DOES reference a variable set by passenv or setenv.
 		// Properties line and character in Position are zero-based, VS Code UI is one-based.
-		const position = new vscode.Position(20, 20);
+		const position = new vscode.Position(29, 20);	// point to variable FILE_ENV_VAR_02 in section testenv:file_reference
 
 		// Act
 
 		const environmentVariablesService = new EnvironmentVariablesService();
-		const resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
+		const resultUpdate = environmentVariablesService.analyzeDocument(textDocument);
 		const hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
 
 		// Assert
@@ -191,10 +197,10 @@ suite('Extension Test Suite', () => {
 
 		// A position which DOES reference a variable set by passenv or setenv.
 		// Properties line and character in Position are zero-based, VS Code UI is one-based.
-		const position1 = new vscode.Position(10, 10);	// section testenv:single_values
-		const position2 = new vscode.Position(20, 20);	// section testenv:file_reference
-		const position3 = new vscode.Position(5, 15);	// in the middle of section name testenv:single_values
-		const position4 = new vscode.Position(100, 100);	// outside of document scope
+		const position1 = new vscode.Position(10, 10);	// point somewhere into section testenv:single_values_01
+		const position2 = new vscode.Position(25, 10);	// point somewhere into section testenv:file_reference
+		const position3 = new vscode.Position(5, 15);	// point into in the middle of section name testenv:single_values_01
+		const position4 = new vscode.Position(100, 100);	// point outside of document
 
 		// Act
 
@@ -206,9 +212,9 @@ suite('Extension Test Suite', () => {
 
 		// Assert
 
-		const expectedSectionName1 = 'testenv:single_values';
+		const expectedSectionName1 = 'testenv:single_values_01';
 		const expectedSectionName2 = 'testenv:file_reference';
-		const expectedSectionName3 = 'testenv:single_values';
+		const expectedSectionName3 = 'testenv:single_values_01';
 		const expectedSectionName4 = 'testenv:file_reference';
 
 		assert.equal(sectionName1, expectedSectionName1, `For the given position the expected section name is: '${expectedSectionName1}'.`);
