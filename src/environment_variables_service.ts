@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class EnvironmentVariablesService implements vscode.HoverProvider {
 
@@ -42,53 +44,70 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
       throw new RangeError("Argument 'envVarMethod' can only be set to 'passenv' or 'setenv'. ");
     }
 
-    const regex = new RegExp(`(^(?<key>${source})(?: |)*=(?: |)*(?<value>[^#;\\\r\n]*(?:\\.[^#;\\\r\n]*)*))`, "gm");
+    const regex = new RegExp(`(?:\\[(?<section>[^#;\\r\\n]+)\\])[\\r\\n]+.*?(?<key>${source})(?: |)*=(?: |)*(?<value>[^#;\\\\\\r\\n]*(?:\\\\.[^#;\\\\\\r\\n]*)*)\\n`, 'gs');
 
     const documentText: string = document.getText();
 
-    let match = regex.exec(documentText);
+    let result = false;
 
-    if (match && match.groups) {
+    // let match = regex.exec(documentText);
+    let match: RegExpExecArray | null;
 
-      let envVarName = match.groups.value;
-      let envVarValue: string;
+    while ((match = regex.exec(documentText)) !== null) {
 
-      if (source === "passenv") {
-
-        envVarValue = this.resolvePassEnvValue(envVarName);
-
-      } else {  // setenv
-
-        const resolvedSetEnv = this.resolveSetEnvValue(envVarName);
-
-        envVarName = resolvedSetEnv.name;
-        envVarValue = resolvedSetEnv.value;
-
+      // This is necessary to avoid infinite loops with zero-width matches
+      if (match.index === regex.lastIndex) {
+        regex.lastIndex++;
       }
 
-      this.environmentVariables.set(envVarName, envVarValue);
+      if (match && match.groups) {
 
-      // Indicate environment variables have been found.
-      return true;
+        const envVarValue = match.groups.value;
 
-    } else {
+        if (source === "passenv") {
 
-      // Indicate NO environment variables have been found.
-      return false;
+          this.updatePassEnvValue(envVarValue);
 
+        } else {  // setenv
+
+          const fileReferencePrefix = 'file|';
+
+          if (envVarValue.startsWith(fileReferencePrefix)) {
+      
+            this.updateSetEnvFileReference(document, envVarValue.substring(fileReferencePrefix.length));
+      
+          } else {  // direct value assignment
+      
+            this.updateSetEnvDirectValue(envVarValue);
+      
+          }
+      
+        }
+
+        // Indicate environment variables have been found.
+        result = result || true;
+
+      }
     }
+
+    return result;
   }
 
-  public resolvePassEnvValue(passEnvVarName: string): string {
+  public updatePassEnvValue(passEnvVarName: string) {
     const envVarValue = process.env[passEnvVarName] ?? "n/a";
 
-    return envVarValue;
+    this.environmentVariables.set(passEnvVarName, envVarValue);
   }
 
-  public resolveSetEnvValue(setEnvVar: string) {
+  /**
+   * Analyzes the part after setenv to extract var names and var values.
+   * @param setEnvValue The part following setenv in a tox.ini file.
+   */
+  public updateSetEnvDirectValue(setEnvValue: string) {
+
     const regex = /(^( +|)(?<key>[^\[\]\r\n=#;]+)(?: |)*=( |)*(?<value>[^#;\\\r\n]*(?:\\.[^#;\\\r\n]*)*))/gm;
 
-    let match = regex.exec(setEnvVar);
+    let match = regex.exec(setEnvValue);
 
     let envVarName: string;
     let envVarValue: string;
@@ -98,15 +117,37 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
       envVarName = match.groups.key.trim();
       envVarValue = match.groups.value.trim();
 
-    } else {
-
-      envVarName = setEnvVar;
-      envVarValue = "n/a";
+      this.environmentVariables.set(envVarName, envVarValue);
 
     }
 
+  }
 
-    return {name: envVarName, value: envVarValue};
+  public updateSetEnvFileReference(document: vscode.TextDocument, filePath: string) {
+
+    // Read .env file.
+    const directoryToxFile = path.dirname(document.fileName);
+    const envFileFullPath = path.resolve(directoryToxFile, filePath);
+    const envFileContent = fs.readFileSync(envFileFullPath, 'utf8');
+
+    const regex = /(?<key>^[A-Z0-9_]+)(?:\=)(?<value>.*$)/gm;
+
+    let match;
+
+    while ((match = regex.exec(envFileContent)) !== null) {
+
+      // This is necessary to avoid infinite loops with zero-width matches.
+      if (match.index === regex.lastIndex) {
+        regex.lastIndex++;
+      }
+
+      if (match && match.groups) {
+
+        this.environmentVariables.set(match.groups.key, match.groups.value ?? "");
+
+      }
+    }
+
   }
 
   public generateHoverMessage(document: vscode.TextDocument, position: vscode.Position): vscode.MarkdownString[] | null {

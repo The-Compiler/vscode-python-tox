@@ -157,5 +157,29 @@ suite('Extension Test Suite', () => {
 		assert.equal(hoverMessage && hoverMessage[0].value, expectedHoverMessage, `For the given position the expected hover message is: '${expectedHoverMessage}'.`);
 	});
 
+	test('get hover message on setenv file reference var position', async () => {
+		// Arrange
+		// A text document containing a sample tox.ini file.
+		const toxIniPath = getExampleToxIniPath("envvars");
+		const textDocument = await vscode.workspace.openTextDocument(toxIniPath);
+
+		// A position which DOES reference a variable set by passenv or setenv.
+		// Properties line and character in Position are zero-based, VS Code UI is one-based.
+		const position = new vscode.Position(20, 20);
+
+		// Act
+
+		const environmentVariablesService = new EnvironmentVariablesService();
+		let resultUpdate = environmentVariablesService.updateAllEnvironmentVariables(textDocument);
+		let hoverMessage = environmentVariablesService.generateHoverMessage(textDocument, position);
+
+		// Assert
+
+		assert.equal(resultUpdate, true, 'Environment variables in the sample tox.ini file should have been found.');
+		assert.notEqual(hoverMessage, null);
+
+		const expectedHoverMessage = "FILE_ENV_VAR_02: 'value_02'";
+		assert.equal(hoverMessage && hoverMessage[0].value, expectedHoverMessage, `For the given position the expected hover message is: '${expectedHoverMessage}'.`);
+	});
 
 });
