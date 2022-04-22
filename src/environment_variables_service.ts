@@ -190,11 +190,11 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
 
   public generateHoverMessage(document: vscode.TextDocument, position: vscode.Position): vscode.MarkdownString[] | null {
 
-    const keyValuePair = this.getEnvVarDataForPosition(document, position);
+    const envVarData = this.getEnvVarDataForPosition(document, position);
 
-    if (keyValuePair) {
+    if (envVarData) {
 
-      const hoverMessage = new vscode.MarkdownString(`${keyValuePair.name}: '${keyValuePair.value}'`);
+      const hoverMessage = new vscode.MarkdownString(`[${envVarData.sectionName}] ${envVarData.varName}: '${envVarData.varValue}'`);
 
       console.log(`hover message: ${hoverMessage.value}`);
 
@@ -218,7 +218,7 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
 
     if (value) {
 
-      return { name: wordAtPosition, value: value };
+      return { sectionName: sectionName, varName: wordAtPosition, varValue: value };
 
     } else {
 

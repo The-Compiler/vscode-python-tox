@@ -127,7 +127,7 @@ suite('Extension Test Suite', () => {
 
 		const testPassEnvName = "PWD";
 		const testPassEnvValue = process.env[testPassEnvName];
-		const expectedHoverMessage = `${testPassEnvName}: '${testPassEnvValue}'`;
+		const expectedHoverMessage = `[testenv:single_values_01] ${testPassEnvName}: '${testPassEnvValue}'`;
 
 		assert.equal(hoverMessage && hoverMessage[0].value, expectedHoverMessage, `For the given position the expected hover message is: '${expectedHoverMessage}'.`);
 	});
@@ -156,10 +156,10 @@ suite('Extension Test Suite', () => {
 		assert.equal(resultUpdate, true, 'Environment variables in the sample tox.ini file should have been found.');
 		assert.notEqual(hoverMessage1, null);
 
-		const expectedHoverMessage1 = "LOCALUI_OUTPUT_PATH: './tests/.output_01'";
+		const expectedHoverMessage1 = "[testenv:single_values_01] LOCALUI_OUTPUT_PATH: './tests/.output_01'";
 		assert.equal(hoverMessage1 && hoverMessage1[0].value, expectedHoverMessage1, `For the given position the expected hover message is: '${expectedHoverMessage1}'.`);
 
-		const expectedHoverMessage2 = "LOCALUI_OUTPUT_PATH: './tests/.output_02'";
+		const expectedHoverMessage2 = "[testenv:single_values_02] LOCALUI_OUTPUT_PATH: './tests/.output_02'";
 		assert.equal(hoverMessage2 && hoverMessage2[0].value, expectedHoverMessage2, `For the given position the expected hover message is: '${expectedHoverMessage2}'.`);
 	});
 
@@ -184,7 +184,7 @@ suite('Extension Test Suite', () => {
 		assert.equal(resultUpdate, true, 'Environment variables in the sample tox.ini file should have been found.');
 		assert.notEqual(hoverMessage, null);
 
-		const expectedHoverMessage = "FILE_ENV_VAR_02: 'value_02'";
+		const expectedHoverMessage = "[testenv:file_reference] FILE_ENV_VAR_02: 'value_02'";
 		assert.equal(hoverMessage && hoverMessage[0].value, expectedHoverMessage, `For the given position the expected hover message is: '${expectedHoverMessage}'.`);
 	});
 
