@@ -101,7 +101,7 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
 
         switch (envVarKey) {
           case "passenv":
-            
+
             this.resolvePassEnvAssignment(sectionName, envVarAssignment);
 
             break;
@@ -109,7 +109,7 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
           case "setenv":
 
             this.resolveSetEnvAssignment(sectionName, document, envVarAssignment);
-  
+
             break;
         }
 
@@ -135,11 +135,11 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
       const trimmedLine = line.trim();
 
       if (trimmedLine) {  // ensure line is not empty after trimming
-      
+
         const envVarValue = process.env[trimmedLine] ?? "n/a";
 
-        this.setToxEnvironmentVariableValue(sectionName, trimmedLine, envVarValue);    
-      
+        this.setToxEnvironmentVariableValue(sectionName, trimmedLine, envVarValue);
+
       }
     }
   }
@@ -163,7 +163,7 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
           this.resolveSetEnvDirectValue(sectionName, trimmedLine);
 
         }
-        
+
       }
     }
   }
@@ -247,15 +247,32 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
     const sectionName = EnvironmentVariablesService.determineSection(document, position);
     const value = this.getToxEnvironmentVariableValue(sectionName, wordAtPosition);
 
-    if (value) {
+    let returnValue: { sectionName: string, varName: string, varValue: string } | null;
 
-      return { sectionName: sectionName, varName: wordAtPosition, varValue: value };
+    if (value) {  // Environment variable name found in current section.
 
-    } else {
+      returnValue = { sectionName: sectionName, varName: wordAtPosition, varValue: value };
 
-      return null;
+    } else {    // Environment variable name NOT found in current section.
+
+      // Look up environment variable name in inherited section testenv.
+      const valueFromTestenv = this.getToxEnvironmentVariableValue("testenv", wordAtPosition);
+
+      if (valueFromTestenv) {  // Environment variable name found in current section.
+
+        returnValue = { sectionName: "testenv", varName: wordAtPosition, varValue: valueFromTestenv };
+
+      } else {
+        // Environment variable name neither found in current section 
+        // nor in inherited section testenv. 
+
+        returnValue = null;
+
+      }
 
     }
+
+    return returnValue;
   }
 
   public getToxEnvironmentVariableValue(sectionName: string, varName: string): string | null {
