@@ -31,6 +31,12 @@ function getSampleToxContent(sampleName: string): string {
 	return toxIniContent;
 }
 
+function constructExpectedHoverMessage(sectionName: string, varName: string, varValue: string) {
+	const expectedHoverMessage = `[${sectionName}] ${varName}: '${varValue}'`;
+
+	return expectedHoverMessage;
+}
+
 async function waitForTerminal() {
 	return new Promise<vscode.Terminal>(resolve => {
 		let disposable = vscode.window.onDidOpenTerminal(terminal => {
@@ -130,14 +136,14 @@ suite('Extension Test Suite', () => {
 		assert.notEqual(hoverMessage2, null);
 
 		const testPassEnvName1 = "PWD";
-		const testPassEnvValue1 = process.env[testPassEnvName1];
-		const expectedHoverMessage1 = `[testenv:single_values_01] ${testPassEnvName1}: '${testPassEnvValue1}'`;
+		const testPassEnvValue1 = process.env[testPassEnvName1] ?? "";
+		const expectedHoverMessage1 = constructExpectedHoverMessage("testenv:single_values_01", testPassEnvName1, testPassEnvValue1);
 
 		assert.equal(hoverMessage1 && hoverMessage1[0].value, expectedHoverMessage1, `For the given position the expected hover message is: '${expectedHoverMessage1}'.`);
 
 		const testPassEnvName2 = "USER";
-		const testPassEnvValue2 = process.env[testPassEnvName2];
-		const expectedHoverMessage2 = `[testenv:multiple_values_01] ${testPassEnvName2}: '${testPassEnvValue2}'`;
+		const testPassEnvValue2 = process.env[testPassEnvName2] ?? "";
+		const expectedHoverMessage2 = constructExpectedHoverMessage("testenv:multiple_values_01", testPassEnvName2, testPassEnvValue2);
 
 		assert.equal(hoverMessage2 && hoverMessage2[0].value, expectedHoverMessage2, `For the given position the expected hover message is: '${expectedHoverMessage2}'.`);
 	});
@@ -170,13 +176,13 @@ suite('Extension Test Suite', () => {
 		assert.notEqual(hoverMessage2, null);
 		assert.notEqual(hoverMessage3, null);
 
-		const expectedHoverMessage1 = "[testenv:single_values_01] LOCALUI_OUTPUT_PATH: './tests/.output_01'";
+		const expectedHoverMessage1 = constructExpectedHoverMessage("testenv:single_values_01", "LOCALUI_OUTPUT_PATH", "./tests/.output_01");
 		assert.equal(hoverMessage1 && hoverMessage1[0].value, expectedHoverMessage1, `For the given position the expected hover message is: '${expectedHoverMessage1}'.`);
 
-		const expectedHoverMessage2 = "[testenv:single_values_02] LOCALUI_OUTPUT_PATH: './tests/.output_02'";
+		const expectedHoverMessage2 = constructExpectedHoverMessage("testenv:single_values_02", "LOCALUI_OUTPUT_PATH", "./tests/.output_02");
 		assert.equal(hoverMessage2 && hoverMessage2[0].value, expectedHoverMessage2, `For the given position the expected hover message is: '${expectedHoverMessage2}'.`);
 
-		const expectedHoverMessage3 = "[testenv:multiple_values_01] REGISTRY_USER: 'value_registry_user'";
+		const expectedHoverMessage3 = constructExpectedHoverMessage("testenv:multiple_values_01", "REGISTRY_USER", "value_registry_user");
 		assert.equal(hoverMessage3 && hoverMessage3[0].value, expectedHoverMessage3, `For the given position the expected hover message is: '${expectedHoverMessage3}'.`);
 
 	});
@@ -206,10 +212,10 @@ suite('Extension Test Suite', () => {
 		assert.notEqual(hoverMessage1, null);
 		assert.notEqual(hoverMessage2, null);
 
-		const expectedHoverMessage1 = "[testenv:file_reference] FILE_ENV_VAR_02: 'value_02'";
+		const expectedHoverMessage1 = constructExpectedHoverMessage("testenv:file_reference", "FILE_ENV_VAR_02", "value_02");
 		assert.equal(hoverMessage1 && hoverMessage1[0].value, expectedHoverMessage1, `For the given position the expected hover message is: '${expectedHoverMessage1}'.`);
 
-		const expectedHoverMessage2 = "[testenv:multiple_values_01] FILE_ENV_VAR_03: 'value_03'";
+		const expectedHoverMessage2 = constructExpectedHoverMessage("testenv:multiple_values_01", "FILE_ENV_VAR_03", "value_03");
 		assert.equal(hoverMessage2 && hoverMessage2[0].value, expectedHoverMessage2, `For the given position the expected hover message is: '${expectedHoverMessage2}'.`);
 
 	});
