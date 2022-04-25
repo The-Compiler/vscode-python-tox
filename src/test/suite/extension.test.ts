@@ -118,8 +118,8 @@ suite('Extension Test Suite', () => {
 
 		// A position which DOES reference a variable set by passenv.
 		// Properties line and character in Position are zero-based, VS Code UI is one-based.
-		const position1 = new vscode.Position(11, 13); // point to variable PWD in section testenv:single_values_01
-		const position2 = new vscode.Position(46, 15); // point to variable USER in section testenv:multiple_values_01
+		const position1 = new vscode.Position(18, 13); // point to variable PWD in section testenv:single_values_01
+		const position2 = new vscode.Position(53, 15); // point to variable USER in section testenv:multiple_values_01
 
 		// Act
 
@@ -156,9 +156,9 @@ suite('Extension Test Suite', () => {
 
 		// A position which DOES reference a variable set by setenv.
 		// Properties line and character in Position are zero-based, VS Code UI is one-based.
-		const position1 = new vscode.Position(12, 20);	// point to variable LOCALUI_OUTPUT_PATH in section testenv:single_values_01
-		const position2 = new vscode.Position(16, 20);	// point to variable LOCALUI_OUTPUT_PATH in section testenv:single_values_02
-		const position3 = new vscode.Position(47, 20);	// point to variable REGISTRY_USER in section testenv:multiple_values_01
+		const position1 = new vscode.Position(19, 20);	// point to variable LOCALUI_OUTPUT_PATH in section testenv:single_values_01
+		const position2 = new vscode.Position(28, 20);	// point to variable LOCALUI_OUTPUT_PATH in section testenv:single_values_02
+		const position3 = new vscode.Position(54, 20);	// point to variable REGISTRY_USER in section testenv:multiple_values_01
 
 		// Act
 
@@ -195,8 +195,8 @@ suite('Extension Test Suite', () => {
 
 		// A position which DOES reference a variable set by passenv or setenv.
 		// Properties line and character in Position are zero-based, VS Code UI is one-based.
-		const position1 = new vscode.Position(29, 20);	// point to variable FILE_ENV_VAR_02 in section testenv:file_reference
-		const position2 = new vscode.Position(50, 20);	// point to variable FILE_ENV_VAR_03 in section testenv:multiple_values_01
+		const position1 = new vscode.Position(36, 20);	// point to variable FILE_ENV_VAR_02 in section testenv:file_reference
+		const position2 = new vscode.Position(57, 20);	// point to variable FILE_ENV_VAR_03 in section testenv:multiple_values_01
 
 		// Act
 
@@ -229,10 +229,10 @@ suite('Extension Test Suite', () => {
 
 		// A position which DOES reference a variable set by passenv or setenv.
 		// Properties line and character in Position are zero-based, VS Code UI is one-based.
-		const position1 = new vscode.Position(10, 10);	// point somewhere into section testenv:single_values_01
-		const position2 = new vscode.Position(25, 10);	// point somewhere into section testenv:file_reference
-		const position3 = new vscode.Position(5, 15);	// point into in the middle of section name testenv:single_values_01
-		const position4 = new vscode.Position(50, 15);	// point into in the middle of section name testenv:multiple_values_01
+		const position1 = new vscode.Position(16, 10);	// point somewhere into section testenv:single_values_01
+		const position2 = new vscode.Position(32, 10);	// point somewhere into section testenv:file_reference
+		const position3 = new vscode.Position(12, 15);	// point into in the middle of section name testenv:single_values_01
+		const position4 = new vscode.Position(56, 15);	// point into in the middle of section name testenv:multiple_values_01
 		const position5 = new vscode.Position(100, 100);	// point outside of document
 
 		// Act
