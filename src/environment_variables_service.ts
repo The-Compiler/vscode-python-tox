@@ -244,7 +244,7 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
 
     console.log(`Word '${wordAtPosition}' at position (${position.line}, ${position.character}) with range from (${range?.start.line}, ${range?.start.character}) to (${range?.end.line}, ${range?.end.character})`);
 
-    const sectionName = this.determineSection(document, position);
+    const sectionName = EnvironmentVariablesService.determineSection(document, position);
     const value = this.getToxEnvironmentVariableValue(sectionName, wordAtPosition);
 
     if (value) {
@@ -284,7 +284,7 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
 
   }
 
-  public determineSection(document: vscode.TextDocument, position: vscode.Position): string {
+  public static determineSection(document: vscode.TextDocument, position: vscode.Position): string {
 
     const positionStart = new vscode.Position(0, 0);
     const positionEnd = new vscode.Position(position.line + 1, 0);

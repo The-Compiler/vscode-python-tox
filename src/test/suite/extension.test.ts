@@ -238,11 +238,11 @@ suite('Extension Test Suite', () => {
 		// Act
 
 		const environmentVariablesService = new EnvironmentVariablesService();
-		const sectionName1 = environmentVariablesService.determineSection(textDocument, position1);
-		const sectionName2 = environmentVariablesService.determineSection(textDocument, position2);
-		const sectionName3 = environmentVariablesService.determineSection(textDocument, position3);
-		const sectionName4 = environmentVariablesService.determineSection(textDocument, position4);
-		const sectionName5 = environmentVariablesService.determineSection(textDocument, position5);
+		const sectionName1 = EnvironmentVariablesService.determineSection(textDocument, position1);
+		const sectionName2 = EnvironmentVariablesService.determineSection(textDocument, position2);
+		const sectionName3 = EnvironmentVariablesService.determineSection(textDocument, position3);
+		const sectionName4 = EnvironmentVariablesService.determineSection(textDocument, position4);
+		const sectionName5 = EnvironmentVariablesService.determineSection(textDocument, position5);
 
 		// Assert
 
