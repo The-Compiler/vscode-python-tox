@@ -50,7 +50,7 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
 
   public static getDocumentSections(documentBody: string): Map<string, string> {
 
-    const regex = /\[(?<sectionName>[^#;\r\n]+)\](?<sectionBody>.*?)(?=\[|$)/gs;
+    const regex = /\[(?<sectionName>[^#;\n]+)\](?<sectionBody>.*?)(?=\[|$)/gs;
 
     let resultSections = new Map<string, string>();
 
@@ -79,13 +79,14 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
 
   public analyzeSection(sectionBody: string, sectionName: string, document: vscode.TextDocument): boolean {
 
-    const regex = /(?<key>passenv|setenv)(?: |)*=(?: |)*(?<value>[^#;\\\r\n]*(?:\\.[^#;\\\r\n]*)*)\n/gs;
+    const regex = /(?<key>passenv|setenv)[ \t]*=[ \t]*(?<assignment>.*?)(?:(?=\n\S)+|$)/gs;
 
     let result = false;
-
     let match: RegExpExecArray | null;
 
-    while ((match = regex.exec(sectionBody)) !== null) {
+    const normalizedSectionBody = sectionBody.replace("\r\n", "\n");
+
+    while ((match = regex.exec(normalizedSectionBody)) !== null) {
 
       // This is necessary to avoid infinite loops with zero-width matches
       if (match.index === regex.lastIndex) {
@@ -96,28 +97,18 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
 
         // const sectionName = match.groups.section;
         const envVarKey = match.groups.key;
-        const envVarValue = match.groups.value;
+        const envVarAssignment = match.groups.assignment;
 
         switch (envVarKey) {
           case "passenv":
             
-            this.resolvePassEnvValue(sectionName, envVarValue);
+            this.resolvePassEnvAssignment(sectionName, envVarAssignment);
 
             break;
 
           case "setenv":
 
-            const fileReferencePrefix = 'file|';
-
-            if (envVarValue.startsWith(fileReferencePrefix)) {
-  
-              this.resolveSetEnvFileReference(sectionName, document, envVarValue.substring(fileReferencePrefix.length));
-  
-            } else {  // direct value assignment
-  
-              this.resolveSetEnvDirectValue(sectionName, envVarValue);
-  
-            }
+            this.resolveSetEnvAssignment(sectionName, document, envVarAssignment);
   
             break;
         }
@@ -131,10 +122,50 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
     return result;
   }
 
-  public resolvePassEnvValue(sectionName: string, passEnvVarName: string) {
-    const envVarValue = process.env[passEnvVarName] ?? "n/a";
+  /**
+   * Adds a set of environment variables to the collection of tox env vars.
+   * @param sectionName 
+   * @param passEnvVarAssignment Environment variables in single or multi lines.
+   */
+  public resolvePassEnvAssignment(sectionName: string, passEnvVarAssignment: string) {
+    const lines = passEnvVarAssignment.split("\n");
 
-    this.setToxEnvironmentVariableValue(sectionName, passEnvVarName, envVarValue);
+    for (let line of lines) {
+
+      const trimmedLine = line.trim();
+
+      if (trimmedLine) {  // ensure line is not empty after trimming
+      
+        const envVarValue = process.env[trimmedLine] ?? "n/a";
+
+        this.setToxEnvironmentVariableValue(sectionName, trimmedLine, envVarValue);    
+      
+      }
+    }
+  }
+
+  public resolveSetEnvAssignment(sectionName: string, document: vscode.TextDocument, setEnvVarAssignment: string) {
+    const fileReferencePrefix = 'file|';
+    const lines = setEnvVarAssignment.split("\n");
+
+    for (let line of lines) {
+
+      const trimmedLine = line.trim();
+
+      if (trimmedLine) {  // ensure line is not empty after trimming
+
+        if (trimmedLine.startsWith(fileReferencePrefix)) {
+
+          this.resolveSetEnvFileReference(sectionName, document, trimmedLine.substring(fileReferencePrefix.length));
+
+        } else {  // direct value assignment
+
+          this.resolveSetEnvDirectValue(sectionName, trimmedLine);
+
+        }
+        
+      }
+    }
   }
 
   /**
@@ -143,7 +174,7 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
    */
   public resolveSetEnvDirectValue(sectionName: string, setEnvValue: string) {
 
-    const regex = /(^( +|)(?<key>[^\[\]\r\n=#;]+)(?: |)*=( |)*(?<value>[^#;\\\r\n]*(?:\\.[^#;\\\r\n]*)*))/gm;
+    const regex = /(^( +|)(?<key>[^\[\]\n=#;]+)(?: |)*=( |)*(?<value>[^#;\\\n]*(?:\\.[^#;\\\n]*)*))/gm;
 
     let match = regex.exec(setEnvValue);
 
