@@ -211,11 +211,9 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	);
 	
-	// When text documents are open, parse tests in them.
+	// Check for tox.ini files when a new document is opened or saved.
 	vscode.workspace.onDidOpenTextDocument(parseTestsInDocument);
-	
-	// We could also listen to document changes to re-parse unsaved changes:
-	vscode.workspace.onDidSaveTextDocument(document => parseTestsInDocument(document));
+	vscode.workspace.onDidSaveTextDocument(parseTestsInDocument);
 
 	/**
 	 * In this function, we'll get the file TestItem if we've already found it,
