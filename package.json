@@ -42,7 +42,11 @@
     "onCommand:python-tox.selectWithArgs",
     "onCommand:python-tox.selectMultiple",
     "onCommand:python-tox.selectMultipleWithArgs",
-    "onCommand:python-tox.openDocs"
+    "onCommand:python-tox.openDocs",
+    "workspaceContains:tox.ini"
+  ],
+  "enabledApiProposals": [
+    "testCoverage"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -73,6 +77,9 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
+    "download-api": "vscode-dts dev",
+    "postdownload-api": "vscode-dts main",
+    "postinstall": "npm run download-api",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts --max-warnings=0",
     "test": "node ./out/test/runTest.js",
@@ -92,6 +99,8 @@
     "mocha": "^10.0.0",
     "ts-mockito": "^2.6.1",
     "typescript": "^4.7.4",
-    "vsce": "^2.9.2"
+    "vsce": "^2.9.2",
+    "vscode-test": "^1.5.2",
+    "vscode-dts": "^0.3.3"
   }
 }

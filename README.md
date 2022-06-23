@@ -38,13 +38,14 @@ but use at your own risk.
 
 ## Installing
 
-Install the extension via the [Visual Studio
+- Install the extension via the [Visual Studio
 Marketplace](https://marketplace.visualstudio.com/items?itemName=the-compiler.python-tox)
 or the [Open VSX
-Registry](https://open-vsx.org/extension/the-compiler/python-tox). Also, make
-sure that [tox](https://github.com/tox-dev/tox) is installed.
+Registry](https://open-vsx.org/extension/the-compiler/python-tox)
 
-Finally, run one of the [commands](#extension-commands) via the command palette
+- make sure that [tox](https://github.com/tox-dev/tox) is installed.
+
+- finally, run one of the [commands](#extension-commands) via the command palette
 or bind them to a shortcut. No default shortcuts are provided.
 
 For [VSpaceCode](https://vspacecode.github.io/), consider a configuration such as:
