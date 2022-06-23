@@ -244,7 +244,7 @@ export function activate(context: vscode.ExtensionContext) {
 	 * @param filename	The name of the file to look for. Default = tox.ini
 	 */
 	async function parseTestsInDocument(e: vscode.TextDocument, filename: string = 'tox.ini') {
-		if (e.uri.scheme === 'file' && e.uri.path.endsWith(filename)) {
+		if (e.uri.scheme === 'file' && path.basename(e.uri.fsPath) === filename) {
 			const file = getOrCreateFile(e.uri);
 			const content = e.getText();
 
