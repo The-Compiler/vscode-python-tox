@@ -26,7 +26,6 @@ function findProjectDir() {
 }
 
 async function getToxEnvs(projDir: string) {
-	console.log(projDir);
 	const { stdout } = await exec('tox -a', {cwd: projDir});
 	return stdout.trim().split(os.EOL);
 }
