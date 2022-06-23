@@ -2,6 +2,12 @@
 
 All notable changes to the "python-tox" extension will be documented in this file.
 
+## v0.2.0
+
+- New `python-tox.runWithArgs` and `python-tox.runMultipleWithArgs` commands
+  which ask for additional arguments to tox.
+- Upgraded all dependencies.
+
 ## v0.1.0
 
 - New `python-tox.openDocs` command to open the tox documentation in the

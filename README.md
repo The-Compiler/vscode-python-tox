@@ -84,6 +84,13 @@ For [VSpaceCode](https://vspacecode.github.io/), consider a configuration such a
                     "icon": "run-all",
                     "type": "command",
                     "command": "python-tox.selectMultipleWithArgs"
+                },
+                {
+                    "key": "?",
+                    "name": "Show tox documentation",
+                    "icon": "book",
+                    "type": "command",
+                    "command": "python-tox.openDocs"
                 }
             ]
         },
@@ -106,6 +113,7 @@ Then install the resulting `.vsix` file using the command palette and selecting
 * `python-tox.selectWithArgs`: Show a menu allowing to pick a tox environment, then ask for custom arguments.
 * `python-tox.selectMultiple`: Show a menu allowing to pick multiple tox environments.
 * `python-tox.selectMultipleWithArgs`: Show a menu allowing to pick multiple tox environments, then ask for custom arguments.
+* `python-tox.openDocs`: Open the tox documentation in the web browser.
 
 ## Release Notes
 
