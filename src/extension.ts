@@ -248,15 +248,8 @@ export function activate(context: vscode.ExtensionContext) {
 			const file = getOrCreateFile(e.uri);
 			const content = e.getText();
 
-			// Empty existing children
-			file.children.forEach(element => {
-				file.children.delete(element.id);
-			});
-
 			const listOfChildren = await parseTestsInFileContents(file, content);
-			listOfChildren.forEach((testItem) => {
-				file.children.add(testItem);
-			});
+			file.children.replace(listOfChildren);
 		}
 	}
 
