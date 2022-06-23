@@ -80,7 +80,12 @@ async function askForToxEnvs(projDir : string) {
 }
 
 async function askForToxArgs() {
-	return vscode.window.showInputBox({ prompt: 'Input additional flags in plain text, e.g. [-vv] [-- {posargs}]', value: ""});
+	return vscode.window.showInputBox({
+		title: 'Additional tox arguments',
+		prompt: 'run via shell',
+		placeHolder: 'e.g. [-vv] or [-- --passed-as-posargs]',
+		value: ""
+	});
 }
 
 async function selectCommand() {
