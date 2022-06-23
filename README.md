@@ -110,11 +110,15 @@ Then install the resulting `.vsix` file using the command palette and selecting
 
 ## Extension Commands
 
-* `python-tox.select`: Show a menu allowing to pick a tox environment.
-* `python-tox.selectWithArgs`: Show a menu allowing to pick a tox environment, then ask for custom arguments.
-* `python-tox.selectMultiple`: Show a menu allowing to pick multiple tox environments.
-* `python-tox.selectMultipleWithArgs`: Show a menu allowing to pick multiple tox environments, then ask for custom arguments.
-* `python-tox.openDocs`: Open the tox documentation in the web browser.
+- `python-tox.select`: Show a menu allowing to pick a tox environment.
+- `python-tox.selectWithArgs`: Show a menu allowing to pick a tox environment, then ask for custom arguments.
+- `python-tox.selectMultiple`: Show a menu allowing to pick multiple tox environments.
+- `python-tox.selectMultipleWithArgs`: Show a menu allowing to pick multiple tox environments, then ask for custom arguments.
+- `python-tox.openDocs`: Open the tox documentation in the web browser.
+
+## Suggested extensions
+
+- [Ini for VSCode](https://marketplace.visualstudio.com/items?itemName=DavidWang.ini-for-vscode) for simpler navigation of large `tox.ini` files.
 
 ## Release Notes
 
