@@ -203,7 +203,7 @@ export function activate(context: vscode.ExtensionContext) {
 		run.end();
 	}
 
-	const runProfile = controller.createRunProfile(
+	controller.createRunProfile(
 		'Run',
 		vscode.TestRunProfileKind.Run,
 		(request, token) => {
