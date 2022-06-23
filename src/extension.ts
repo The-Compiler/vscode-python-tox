@@ -266,7 +266,6 @@ export function activate(context: vscode.ExtensionContext) {
 	 * @param contents The contents of the file
 	 */
 	async function parseTestsInFileContents(file: vscode.TestItem, contents?: string): Promise<vscode.TestItem[]> {
-		
 		if (contents === undefined) {
 			const rawContent = await vscode.workspace.fs.readFile(file.uri!);
 			contents = new util.TextDecoder().decode(rawContent);
@@ -280,18 +279,25 @@ export function activate(context: vscode.ExtensionContext) {
 		for (let lineNo = 0; lineNo < lines.length; lineNo++) {
 			let line = lines[lineNo];
     		let regexResult = testRegex.exec(line);
-
-			// Excluding tox permutations for now
-			if (regexResult && !regexResult[2].includes('{')) {
-				let range = new vscode.Range(new vscode.Position(lineNo, 0), new vscode.Position(lineNo, regexResult[0].length));
-				
-				const newTestItem = controller.createTestItem(regexResult[2], regexResult[2], file.uri);
-				newTestItem.range = range;
-
-				listOfChildren.push(newTestItem);
+			if (!regexResult) {
+				continue;
 			}
+
+			let envName = regexResult[2];
+			if (envName.includes('{')) {
+				// Excluding tox permutations for now
+				continue;
+			}
+
+			const newTestItem = controller.createTestItem(envName, envName, file.uri);
+			newTestItem.range = new vscode.Range(
+				new vscode.Position(lineNo, 0),
+				new vscode.Position(lineNo, regexResult[0].length)
+			);
+
+			listOfChildren.push(newTestItem);
 		}
-		
+
 		return listOfChildren;
 	}
 
