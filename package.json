@@ -1,98 +1,104 @@
 {
-  "name": "python-tox",
-  "displayName": "python-tox",
-  "description": "Integrates the tox task automation tool",
-  "keywords": [
-    "python",
-    "tox"
-  ],
-  "version": "0.1.0",
-  "license": "MIT",
-  "publisher": "the-compiler",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/The-Compiler/vscode-python-tox.git"
-  },
-  "bugs": {
-    "url": "https://github.com/The-Compiler/vscode-python-tox/issues",
-    "email": "visualstudio.com@the-compiler.org"
-  },
-  "badges": [
-    {
-      "url": "https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=pink",
-      "href": "https://github.com/sponsors/The-Compiler/",
-      "description": "Sponsor on GitHub Sponsors"
-    }
-  ],
-  "icon": "img/tox.png",
-  "galleryBanner": {
-    "color": "#92a16d",
-    "theme": "light"
-  },
-  "engines": {
-    "vscode": "^1.59.0"
-  },
-  "categories": [
-    "Programming Languages",
-    "Linters",
-    "Other"
-  ],
-  "activationEvents": [
-    "onCommand:python-tox.select",
-    "onCommand:python-tox.selectWithArgs",
-    "onCommand:python-tox.selectMultiple",
-    "onCommand:python-tox.selectMultipleWithArgs",
-    "onCommand:python-tox.openDocs",
-    "workspaceContains:tox.ini"
-  ],
-  "main": "./out/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "python-tox.select",
-        "title": "Select and run tox environment"
-      },
-      {
-        "command": "python-tox.selectMultiple",
-        "title": "Select and run multiple tox environments"
-      },
-      {
-        "command": "python-tox.selectWithArgs",
-        "title": "Select and run tox environment with custom arguments"
-      },
-      {
-        "command": "python-tox.selectMultipleWithArgs",
-        "title": "Select and run multiple tox environments with custom arguments"
-      },
-      {
-        "command": "python-tox.openDocs",
-        "title": "Open tox documentation in default browser"
-      }
-    ]
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts --max-warnings=0",
-    "test": "node ./out/test/runTest.js",
-    "package": "vsce package",
-    "publish": "vsce publish"
-  },
-  "devDependencies": {
-    "@types/glob": "^7.2.0",
-    "@types/mocha": "^9.1.1",
-    "@types/node": "^18.0.0",
-    "@types/vscode": "^1.59.0",
-    "@typescript-eslint/eslint-plugin": "^5.29.0",
-    "@typescript-eslint/parser": "^5.29.0",
-    "@vscode/test-electron": "^2.1.4",
-    "eslint": "^8.18.0",
-    "glob": "^8.0.3",
-    "mocha": "^10.0.0",
-    "ts-mockito": "^2.6.1",
-    "typescript": "^4.7.4",
-    "vsce": "^2.9.2"
-  }
+	"name": "python-tox",
+	"displayName": "python-tox",
+	"description": "Integrates the tox task automation tool",
+	"keywords": [
+		"python",
+		"tox"
+	],
+	"version": "0.1.0",
+	"license": "MIT",
+	"publisher": "the-compiler",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/The-Compiler/vscode-python-tox.git"
+	},
+	"bugs": {
+		"url": "https://github.com/The-Compiler/vscode-python-tox/issues",
+		"email": "visualstudio.com@the-compiler.org"
+	},
+	"badges": [
+		{
+			"url": "https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=pink",
+			"href": "https://github.com/sponsors/The-Compiler/",
+			"description": "Sponsor on GitHub Sponsors"
+		}
+	],
+	"icon": "img/tox.png",
+	"galleryBanner": {
+		"color": "#92a16d",
+		"theme": "light"
+	},
+	"engines": {
+		"vscode": "^1.59.0"
+	},
+	"categories": [
+		"Programming Languages",
+		"Linters",
+		"Other"
+	],
+	"activationEvents": [
+		"onCommand:python-tox.select",
+		"onCommand:python-tox.selectWithArgs",
+		"onCommand:python-tox.selectMultiple",
+		"onCommand:python-tox.selectMultipleWithArgs",
+		"onCommand:python-tox.openDocs",
+		"workspaceContains:tox.ini"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "python-tox.select",
+				"title": "Select and run tox environment"
+			},
+			{
+				"command": "python-tox.selectMultiple",
+				"title": "Select and run multiple tox environments"
+			},
+			{
+				"command": "python-tox.selectWithArgs",
+				"title": "Select and run tox environment with custom arguments"
+			},
+			{
+				"command": "python-tox.selectMultipleWithArgs",
+				"title": "Select and run multiple tox environments with custom arguments"
+			},
+			{
+				"command": "python-tox.openDocs",
+				"title": "Open tox documentation in default browser"
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile && npm run lint",
+		"lint": "eslint src --ext ts --max-warnings=0",
+		"test": "node ./out/test/runTest.js",
+		"package": "vsce package",
+		"publish": "vsce publish"
+	},
+	"devDependencies": {
+		"@types/glob": "^7.2.0",
+		"@types/mocha": "^9.1.1",
+		"@types/node": "^18.0.0",
+		"@types/vscode": "^1.59.0",
+		"@typescript-eslint/eslint-plugin": "^5.29.0",
+		"@typescript-eslint/parser": "^5.29.0",
+		"@vscode/test-electron": "^2.1.4",
+		"eslint": "^8.18.0",
+		"glob": "^8.0.3",
+		"mocha": "^10.0.0",
+		"ts-mockito": "^2.6.1",
+		"typescript": "^4.7.4",
+		"vsce": "^2.9.2"
+	},
+	"__metadata": {
+		"id": "4bf06dca-7623-4c24-bebc-086fabf79e93",
+		"publisherDisplayName": "The Compiler",
+		"publisherId": "f0b11697-58e0-4d45-ba83-2e47875557e2",
+		"isPreReleaseVersion": false
+	}
 }
