@@ -53,18 +53,41 @@ For [VSpaceCode](https://vspacecode.github.io/), consider a configuration such a
     "vspacecode.bindingOverrides": [
         {
             "keys": ["m", "languageId:python", "c", "t"],
-            "name": "+Run tox",
+            "name": "+Tox",
             "icon": "play",
-            "type": "command",
-            "command": "python-tox.select"
+            "type": "bindings",
+            "bindings": [
+                {
+                    "key": "t",
+                    "name": "Run tox",
+                    "icon": "play",
+                    "type": "command",
+                    "command": "python-tox.select"
+                },
+                {
+                    "key": "T",
+                    "name": "Run tox with arguments",
+                    "icon": "play-circle",
+                    "type": "command",
+                    "command": "python-tox.selectWithArgs"
+                },
+                {
+                    "key": "m",
+                    "name": "Run tox (multiple)",
+                    "icon": "run-all",
+                    "type": "command",
+                    "command": "python-tox.selectMultiple"
+                },
+                {
+                    "key": "M",
+                    "name": "Run tox (multiple) with arguments",
+                    "icon": "run-all",
+                    "type": "command",
+                    "command": "python-tox.selectMultipleWithArgs"
+                }
+            ]
         },
-        {
-            "keys": ["m", "languageId:python", "c", "T"],
-            "name": "+Run tox (multiple)",
-            "icon": "run-all",
-            "type": "command",
-            "command": "python-tox.selectMultiple"
-        },
+        // ...
     ]
 ```
 
@@ -80,7 +103,9 @@ Then install the resulting `.vsix` file using the command palette and selecting
 ## Extension Commands
 
 * `python-tox.select`: Show a menu allowing to pick a tox environment.
+* `python-tox.selectWithArgs`: Show a menu allowing to pick a tox environment, then ask for custom arguments.
 * `python-tox.selectMultiple`: Show a menu allowing to pick multiple tox environments.
+* `python-tox.selectMultipleWithArgs`: Show a menu allowing to pick multiple tox environments, then ask for custom arguments.
 
 ## Release Notes
 

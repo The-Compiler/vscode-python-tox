@@ -64,19 +64,44 @@ function getTerminal(projDir : string = findProjectDir(), name : string = "tox")
 	return vscode.window.createTerminal({"cwd": projDir, "name": name});
 }
 
-async function selectCommand() {
-	const projDir = findProjectDir();
+async function askForToxEnv(projDir : string) {
 	const envs = await safeGetToxEnvs(projDir);
 	if (!envs) {
 		return;
 	}
-	const selected = await vscode.window.showQuickPick(envs, {placeHolder: "tox environment"});
+	return vscode.window.showQuickPick(envs, {placeHolder: "tox environment"});
+}
+
+async function askForToxEnvs(projDir : string) {
+	const envs = await safeGetToxEnvs(projDir);
+	if (!envs) {
+		return;
+	}
+	return vscode.window.showQuickPick(envs, {placeHolder: "tox environments", canPickMany: true});
+}
+
+async function askForToxArgs() {
+	return vscode.window.showInputBox({ prompt: 'Input additional flags in plain text, e.g. [-vv] [-- {posargs}]', value: ""});
+}
+
+async function selectCommand() {
+	const projDir = findProjectDir();
+	const selected = await askForToxEnv(projDir);
 	if (!selected) {
 		return;
 	}
 
-	const toxArguments = await vscode.window.showInputBox({ prompt: 'Input additional flags in plain text, e.g. [-vv] [-- {posargs}]', value: ""});
-	
+	runTox([selected], "", getTerminal(projDir));
+}
+
+async function selectWithArgsCommand() {
+	const projDir = findProjectDir();
+	const selected = await askForToxEnv(projDir);
+	if (!selected) {
+		return;
+	}
+
+	const toxArguments = await askForToxArgs();
 	// Only cancel on escape (undefined), allow empty string to proceed.
 	if (toxArguments === undefined) {
 		return;
@@ -87,15 +112,28 @@ async function selectCommand() {
 
 async function selectMultipleCommand() {
 	const projDir = findProjectDir();
-	const envs = await safeGetToxEnvs(projDir);
-	if (!envs) {
-		return;
-	}
-	const selected = await vscode.window.showQuickPick(envs, {placeHolder: "tox environments", canPickMany: true});
+	const selected = await askForToxEnvs(projDir);
 	if (!selected) {
 		return;
 	}
+
 	runTox(selected, "", getTerminal(projDir));
+}
+
+async function selectMultipleWithArgsCommand() {
+	const projDir = findProjectDir();
+	const selected = await askForToxEnvs(projDir);
+	if (!selected) {
+		return;
+	}
+
+	const toxArguments = await askForToxArgs();
+	// Only cancel on escape (undefined), allow empty string to proceed.
+	if (toxArguments === undefined) {
+		return;
+	}
+
+	runTox(selected, toxArguments, getTerminal(projDir));
 }
 
 async function openDocumentationCommand() {
@@ -105,7 +143,9 @@ async function openDocumentationCommand() {
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('python-tox.select', selectCommand),
+		vscode.commands.registerCommand('python-tox.selectWithArgs', selectWithArgsCommand),
 		vscode.commands.registerCommand('python-tox.selectMultiple', selectMultipleCommand),
+		vscode.commands.registerCommand('python-tox.selectMultipleWithArgs', selectMultipleWithArgsCommand),
 		vscode.commands.registerCommand('python-tox.openDocs', openDocumentationCommand)
 	);
 }

@@ -39,7 +39,9 @@
   ],
   "activationEvents": [
     "onCommand:python-tox.select",
+    "onCommand:python-tox.selectWithArgs",
     "onCommand:python-tox.selectMultiple",
+    "onCommand:python-tox.selectMultipleWithArgs",
     "onCommand:python-tox.openDocs"
   ],
   "main": "./out/extension.js",
@@ -52,6 +54,14 @@
       {
         "command": "python-tox.selectMultiple",
         "title": "Select and run multiple tox environments"
+      },
+      {
+        "command": "python-tox.selectWithArgs",
+        "title": "Select and run tox environment with custom arguments"
+      },
+      {
+        "command": "python-tox.selectMultipleWithArgs",
+        "title": "Select and run multiple tox environments with custom arguments"
       },
       {
         "command": "python-tox.openDocs",
