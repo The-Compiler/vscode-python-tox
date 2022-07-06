@@ -12,6 +12,7 @@ export class ToxTaskProvider implements vscode.TaskProvider {
     static readonly toxType = 'tox';
     static readonly toxIni = 'tox.ini';
     private toxPromise: Thenable<vscode.Task[]> | undefined = undefined;
+    private workspaceRoot: string;
 
     constructor(workspaceRoot: string) {
         const pattern = path.join(workspaceRoot, ToxTaskProvider.toxIni);
@@ -19,11 +20,13 @@ export class ToxTaskProvider implements vscode.TaskProvider {
         fileWatcher.onDidChange(() => this.toxPromise = undefined);
         fileWatcher.onDidCreate(() => this.toxPromise = undefined);
         fileWatcher.onDidDelete(() => this.toxPromise = undefined);
+
+        this.workspaceRoot = workspaceRoot;
     }
 
     public provideTasks(): Thenable<vscode.Task[]> | undefined {
         if (!this.toxPromise) {
-            this.toxPromise = getToxTestenvs();
+            this.toxPromise = getToxTestenvs(this.workspaceRoot);
         }
         return this.toxPromise;
     }
@@ -71,15 +74,19 @@ function inferTaskGroup(taskName: string): vscode.TaskGroup | undefined {
     }
 }
 
-async function getToxTestenvs(): Promise<vscode.Task[]> {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
+async function getToxTestenvs(workspaceRoot: string): Promise<vscode.Task[]> {
+    let workspaceFolders = vscode.workspace.workspaceFolders;
     const result: vscode.Task[] = [];
 
     console.log("!! getToxTestenvs");
 
     if (!workspaceFolders || workspaceFolders.length === 0) {
-        console.log("!! no workspace");
-        return result;
+        const fallback = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(workspaceRoot));
+        if (!fallback) {
+            console.log("!! no workspace");
+            return result;
+        }
+        workspaceFolders = [fallback];
     }
     for (const workspaceFolder of workspaceFolders) {
         const folderString = workspaceFolder.uri.fsPath;
