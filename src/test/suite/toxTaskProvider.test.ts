@@ -22,16 +22,16 @@ suite('ToxTaskProvider Test Suite', () => {
 	test('getting tox tasks', async() => {
 		const dir = utils.getExampleDir("allenvs");
 
-		const allEnvsWorkspaceFolder = {
-			uri: vscode.Uri.file(dir),
-			name: "AllEnvs",
-			index: 0,
-		};
+		//const allEnvsWorkspaceFolder = {
+		//	uri: vscode.Uri.file(dir),
+		//	name: "AllEnvs",
+		//	index: 0,
+		//};
 
-		vscode.workspace.updateWorkspaceFolders(0, 1, allEnvsWorkspaceFolder);
-		if (!vscode.workspace.workspaceFolders) {
-			await waitForWorkspaceFolderChange();
-		}
+		//vscode.workspace.updateWorkspaceFolders(0, 1, allEnvsWorkspaceFolder);
+		//if (!vscode.workspace.workspaceFolders) {
+		//	await waitForWorkspaceFolderChange();
+		//}
 
 		const toxTaskProvider = new tasks.ToxTaskProvider(dir);
 		const toxTasks = await toxTaskProvider.provideTasks();
