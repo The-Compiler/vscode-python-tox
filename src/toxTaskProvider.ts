@@ -75,24 +75,32 @@ async function getToxTestenvs(): Promise<vscode.Task[]> {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     const result: vscode.Task[] = [];
 
+    console.log("!! getToxTestenvs");
+
     if (!workspaceFolders || workspaceFolders.length === 0) {
+        console.log("!! no workspace");
         return result;
     }
     for (const workspaceFolder of workspaceFolders) {
         const folderString = workspaceFolder.uri.fsPath;
+        console.log(`!! workspace ${folderString}`);
         if (!folderString) {
             continue;
         }
         const toxFile = path.join(folderString, ToxTaskProvider.toxIni);
+        console.log(`!! toxFile ${toxFile}`);
         try {
             await fs_promises.access(toxFile, fs.constants.R_OK);
+            console.log("access ok");
         } catch {
+            console.log("access nok");
             continue;
         }
 
         const commandLine = 'tox -a';
         try {
             const { stdout, stderr } = await exec(commandLine, { cwd: folderString });
+            console.log(`exec ${commandLine}: ${stdout} ${stderr}`);
             if (stderr && stderr.length > 0) {
                 const channel = getOutputChannel();
                 channel.appendLine(stderr);
@@ -101,6 +109,7 @@ async function getToxTestenvs(): Promise<vscode.Task[]> {
             if (stdout) {
                 const lines = stdout.split(/\r?\n/);
                 for (const line of lines) {
+                    console.log(`line ${line}`);
                     if (line.length === 0) {
                         continue;
                     }
@@ -118,6 +127,7 @@ async function getToxTestenvs(): Promise<vscode.Task[]> {
                         new vscode.ShellExecution(`tox -e ${toxTestenv}`)
                     );
                     task.group = inferTaskGroup(line.toLowerCase());
+                    console.log(`task ${task.name}`);
                     result.push(task);
                 }
             }
@@ -129,6 +139,7 @@ async function getToxTestenvs(): Promise<vscode.Task[]> {
             if (err.stdout) {
                 channel.appendLine(err.stdout);
             }
+            console.log(`!! ERR ${err.stderr} ${err.stdout}`);
             channel.appendLine('Auto detecting tox testenvs failed.');
             channel.show(true);
         }
