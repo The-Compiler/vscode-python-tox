@@ -8,6 +8,7 @@ src/test/examples/*/.tox
 # Python
 __pycache__
 .pytest_cache
+.venv
 
 # VS Code
 vscode.d.ts
