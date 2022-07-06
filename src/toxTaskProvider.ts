@@ -32,7 +32,13 @@ export class ToxTaskProvider implements vscode.TaskProvider {
         const testenv = _task.definition.testenv;
         if (testenv) {
             const definition: ToxTaskDefinition = <any>_task.definition;
-            return new vscode.Task(definition, _task.scope ?? vscode.TaskScope.Workspace, definition.testenv, ToxTaskProvider.toxType, new vscode.ShellExecution(`tox -e ${definition.testenv}`));
+            return new vscode.Task(
+                definition,
+                _task.scope ?? vscode.TaskScope.Workspace,
+                definition.testenv,
+                ToxTaskProvider.toxType,
+                new vscode.ShellExecution(`tox -e ${definition.testenv}`)
+            );
         }
         return undefined;
     }
@@ -53,24 +59,16 @@ interface ToxTaskDefinition extends vscode.TaskDefinition {
     testenv: string;
 }
 
-const buildNames: string[] = ['build', 'compile', 'watch'];
-function isBuildTask(name: string): boolean {
-    for (const buildName of buildNames) {
-        if (name.indexOf(buildName) !== -1) {
-            return true;
-        }
+const buildTaskNames: string[] = ['build', 'compile', 'watch'];
+const testTaskNames: string[] = ['test'];
+function inferTaskGroup(taskName: string): vscode.TaskGroup | undefined {
+    if (buildTaskNames.includes(taskName)) {
+        return vscode.TaskGroup.Build;
+    } else if (testTaskNames.includes(taskName)) {
+        return vscode.TaskGroup.Test;
+    } else {
+        return undefined;
     }
-    return false;
-}
-
-const testNames: string[] = ['test'];
-function isTestTask(name: string): boolean {
-    for (const testName of testNames) {
-        if (name.indexOf(testName) !== -1) {
-            return true;
-        }
-    }
-    return false;
 }
 
 async function getToxTestenvs(): Promise<vscode.Task[]> {
@@ -96,11 +94,12 @@ async function getToxTestenvs(): Promise<vscode.Task[]> {
         try {
             const { stdout, stderr } = await exec(commandLine, { cwd: folderString });
             if (stderr && stderr.length > 0) {
-                getOutputChannel().appendLine(stderr);
-                getOutputChannel().show(true);
+                const channel = getOutputChannel();
+                channel.appendLine(stderr);
+                channel.show(true);
             }
             if (stdout) {
-                const lines = stdout.split(/\r{0,1}\n/);
+                const lines = stdout.split(/\r?\n/);
                 for (const line of lines) {
                     if (line.length === 0) {
                         continue;
@@ -111,14 +110,15 @@ async function getToxTestenvs(): Promise<vscode.Task[]> {
                         testenv: toxTestenv
                     };
 
-                    const task = new vscode.Task(kind, workspaceFolder, toxTestenv, ToxTaskProvider.toxType, new vscode.ShellExecution(`tox -e ${toxTestenv}`));
+                    const task = new vscode.Task(
+                        kind,
+                        workspaceFolder,
+                        toxTestenv,
+                        ToxTaskProvider.toxType,
+                        new vscode.ShellExecution(`tox -e ${toxTestenv}`)
+                    );
+                    task.group = inferTaskGroup(line.toLowerCase());
                     result.push(task);
-                    const lowerCaseLine = line.toLowerCase();
-                    if (isBuildTask(lowerCaseLine)) {
-                        task.group = vscode.TaskGroup.Build;
-                    } else if (isTestTask(lowerCaseLine)) {
-                        task.group = vscode.TaskGroup.Test;
-                    }
                 }
             }
         } catch (err: any) {
