@@ -28,7 +28,7 @@ suite('ToxTaskProvider Test Suite', () => {
 			index: 0,
 		};
 
-		vscode.workspace.updateWorkspaceFolders(0, null, allEnvsWorkspaceFolder);
+		vscode.workspace.updateWorkspaceFolders(0, 1, allEnvsWorkspaceFolder);
 		if (!vscode.workspace.workspaceFolders) {
 			await waitForWorkspaceFolderChange();
 		}
