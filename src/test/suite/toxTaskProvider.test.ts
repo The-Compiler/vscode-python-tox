@@ -6,6 +6,15 @@ import * as vscode from 'vscode';
 import * as tasks from '../../toxTaskProvider';
 import * as utils from './utils';
 
+async function waitForWorkspaceFolderChange() {
+	return new Promise<void>(resolve => {
+		let disposable = vscode.workspace.onDidChangeWorkspaceFolders(() => {
+			disposable.dispose();
+			resolve();
+		});
+	});
+}
+
 suite('ToxTaskProvider Test Suite', () => {
 
 	vscode.window.showInformationMessage('Start all tests.');
@@ -20,6 +29,9 @@ suite('ToxTaskProvider Test Suite', () => {
 		};
 
 		vscode.workspace.updateWorkspaceFolders(0, null, allEnvsWorkspaceFolder);
+		if (!vscode.workspace.workspaceFolders) {
+			await waitForWorkspaceFolderChange();
+		}
 
 		const toxTaskProvider = new tasks.ToxTaskProvider(dir);
 		const toxTasks = await toxTaskProvider.provideTasks();
