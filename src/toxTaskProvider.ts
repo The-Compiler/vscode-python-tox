@@ -1,7 +1,12 @@
 import * as path from 'path';
+import * as fs_promises from 'fs/promises';
 import * as fs from 'fs';
-import * as cp from 'child_process';
+import * as child_process from 'child_process';
 import * as vscode from 'vscode';
+import * as util from 'util';
+
+
+const exec = util.promisify(child_process.exec);
 
 export class ToxTaskProvider implements vscode.TaskProvider {
     static readonly toxType = 'tox';
@@ -31,25 +36,6 @@ export class ToxTaskProvider implements vscode.TaskProvider {
         }
         return undefined;
     }
-}
-
-function exists(file: string): Promise<boolean> {
-    return new Promise<boolean>((resolve, _reject) => {
-        fs.exists(file, (value) => {
-            resolve(value);
-        });
-    });
-}
-
-function exec(command: string, options: cp.ExecOptions): Promise<{ stdout: string; stderr: string }> {
-    return new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
-        cp.exec(command, options, (error, stdout, stderr) => {
-            if (error) {
-                reject({ error, stdout, stderr });
-            }
-            resolve({ stdout, stderr });
-        });
-    });
 }
 
 let _channel: vscode.OutputChannel;
@@ -100,7 +86,9 @@ async function getToxTestenvs(): Promise<vscode.Task[]> {
             continue;
         }
         const toxFile = path.join(folderString, ToxTaskProvider.toxIni);
-        if (!await exists(toxFile)) {
+        try {
+            await fs_promises.access(toxFile, fs.constants.R_OK);
+        } catch {
             continue;
         }
 
