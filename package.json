@@ -44,7 +44,8 @@
 		"onCommand:python-tox.selectMultiple",
 		"onCommand:python-tox.selectMultipleWithArgs",
 		"onCommand:python-tox.openDocs",
-		"workspaceContains:tox.ini"
+		"workspaceContains:tox.ini",
+    	"onLanguage:ini"
 	],
 	"main": "./out/extension.js",
 	"contributes": {

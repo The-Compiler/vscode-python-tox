@@ -3,6 +3,7 @@ import * as child_process from 'child_process';
 import * as util from 'util';
 import * as path from 'path';
 import * as os from 'os';
+import { EnvironmentVariablesService } from './environment_variables_service';
 
 import { ToxTaskProvider } from './toxTaskProvider';
 
@@ -329,13 +330,17 @@ export function activate(context: vscode.ExtensionContext) {
 		toxTaskProvider = vscode.tasks.registerTaskProvider(ToxTaskProvider.toxType, new ToxTaskProvider(workspaceTox));
 	}
 
+	const environmentVariablesService = new EnvironmentVariablesService();
+
 	context.subscriptions.push(
 		vscode.commands.registerCommand('python-tox.select', selectCommand),
 		vscode.commands.registerCommand('python-tox.selectWithArgs', selectWithArgsCommand),
 		vscode.commands.registerCommand('python-tox.selectMultiple', selectMultipleCommand),
 		vscode.commands.registerCommand('python-tox.selectMultipleWithArgs', selectMultipleWithArgsCommand),
-		vscode.commands.registerCommand('python-tox.openDocs', openDocumentationCommand)
+		vscode.commands.registerCommand('python-tox.openDocs', openDocumentationCommand),
+		vscode.languages.registerHoverProvider(['ini'], environmentVariablesService)
 	);
+
 }
 
 export function deactivate() {
