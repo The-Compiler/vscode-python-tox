@@ -2,7 +2,7 @@
 
 All notable changes to the "python-tox" extension will be documented in this file.
 
-## v0.2.0
+## v1.0.0
 
 - New `python-tox.runWithArgs` and `python-tox.runMultipleWithArgs` commands
   which ask for additional arguments to tox.

@@ -26,15 +26,24 @@
 
 This extension integrates the [tox](https://tox.readthedocs.io/) task automation tool with Visual Studio Code.
 
-![Screenshot](img/quickpick.png)
+## Features
 
-## Here be dragons
+Commands to run single or multiple tox environments, with or without additional
+arguments:
 
-**Note:** The extension was mainly written to scratch my own itch, and this is
-the first time I'm writing something "real" using TypeScript and NodeJS.
+![Running single environment](img/screenshots/run-single.png)
 
-Contributions, suggestions and improvements of all kinds are very welcome,
-but use at your own risk.
+![Running multiple environments](img/screenshots/run-multiple.png)
+
+![Specifying arguments](img/screenshots/args.png)
+
+Integration with VS Code's testing feature when opening a `tox.ini` file:
+
+![Test integration](img/screenshots/test-integration.png)
+
+Hover information for environment variables while editing a `tox.ini` file:
+
+![Hover information](img/screenshots/envvar.png)
 
 ## Installing
 
