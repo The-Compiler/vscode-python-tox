@@ -8,6 +8,8 @@ All notable changes to the "python-tox" extension will be documented in this fil
   which ask for additional arguments to tox.
 - Basic integration with VS Code's testing extension API, by providing a tox test runner when a `tox.ini` file is open. This allows running tox environments right from the editor.
 - Integration with VS Code's task API, so that tox environments can be run as tasks.
+- Hover information for environment variables (`passenv` / `setenv`) when
+  editing a `tox.ini` file.
 - Upgraded all dependencies.
 
 ## v0.1.0
