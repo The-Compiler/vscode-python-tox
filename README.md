@@ -115,6 +115,24 @@ Then install the resulting `.vsix` file using the command palette and selecting
 - `python-tox.selectMultiple`: Show a menu allowing to pick multiple tox environments.
 - `python-tox.selectMultipleWithArgs`: Show a menu allowing to pick multiple tox environments, then ask for custom arguments.
 - `python-tox.openDocs`: Open the tox documentation in the web browser.
+- `python-tox.createEnv`: A guided process to add a new tox environment to an existing tox.ini.
+
+## Configuration
+
+### python-tox.environment.template.new
+
+This configuration section contains the relevant fields for creating new tox environments.
+
+| Fields | Description | Sample value |
+| - | - | - |
+| templateFilePath | File path to the template file. The content of this file is copied when creating a new tox env. Support for token replacement. The following tokens are supported: `TOX_ENV_NAME` | "/usr/template.tox.new"
+
+#### Sample template file
+
+```ini
+[testenv:[${TOX_ENV_NAME}]
+commands = {envpython} -c "print('one']"
+```
 
 ## Suggested extensions
 

@@ -1,0 +1,5 @@
+{
+    "python-tox.environment.template.new": {
+        "filePath": "template.createenv.ini"
+    }
+}

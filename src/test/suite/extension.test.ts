@@ -6,8 +6,11 @@ import * as vscode from 'vscode';
 import * as extension from '../../extension';
 import * as path from 'path';
 import * as fs from 'fs';
-import {mock, verify, instance} from 'ts-mockito';
+import { mock, verify, instance, when } from 'ts-mockito';
 import * as utils from './utils';
+import { ToxEnvironmentService } from '../../service/toxEnvironmentService';
+import { ConfigNewEnvironment } from '../../model/toxConfiguration';
+
 
 function getExampleFileUri(name: string, file: string) {
 	const dir = utils.getExampleDir(name);
@@ -81,4 +84,37 @@ suite('Extension Test Suite', () => {
 		verify(mockedTerminal.sendText(terminalCommand)).called();
 	});
 
+	test('create new tox environment', async () => {
+		const dir = utils.getExampleDir("createenv");
+		const toxIni = path.join(dir, "tox.ini");
+		const newEnvName = "my-new-env";
+		const vscodeConfigFile = path.join(dir, "settings.json");
+
+		// mock user input	
+		vscode.window.showInputBox = (_options, _token) => {
+			let mockedInput: string | undefined = undefined;
+	
+			if (_options?.prompt === "Enter tox.ini path")
+			{
+				mockedInput = toxIni; 
+			} else if (_options?.prompt === "Enter new tox environment name") {
+				mockedInput = newEnvName;
+			}
+	
+			return Promise.resolve(mockedInput);
+		};
+
+		// mock vs configuration
+		const configuration : ConfigNewEnvironment = {
+			templateFilePath: vscodeConfigFile
+		};
+		const mockedWorkspaceConfig = mock<vscode.WorkspaceConfiguration>();
+		when(mockedWorkspaceConfig.get<ConfigNewEnvironment>("environment.template.new")).thenReturn(configuration);
+		vscode.workspace.getConfiguration = (_section, _scope) => instance(mockedWorkspaceConfig);
+
+		const toxEnvService = new ToxEnvironmentService("python-tox");
+		const newEnv = await toxEnvService.createNewEnvironment(toxIni);
+
+		assert.equal(newEnv?.name, newEnvName);
+	});
 });

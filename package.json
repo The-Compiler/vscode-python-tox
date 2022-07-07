@@ -44,6 +44,7 @@
 		"onCommand:python-tox.selectMultiple",
 		"onCommand:python-tox.selectMultipleWithArgs",
 		"onCommand:python-tox.openDocs",
+    	"onCommand:python-tox.createEnv",
 		"workspaceContains:tox.ini"
 	],
 	"main": "./out/extension.js",
@@ -82,8 +83,25 @@
 			{
 				"command": "python-tox.openDocs",
 				"title": "Open tox documentation in default browser"
+			},
+			{
+				"command": "python-tox.createEnv",
+				"title": "Create new tox environment"
 			}
 		]
+	},
+	"configuration": {
+		"title": "python-tox",
+		"properties": {
+			"python-tox.environment.template.new": {
+				"type": [
+					"object",
+					"null"
+				],
+				"default": null,
+				"description": "Path to template file (within workspace)"
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
@@ -103,12 +121,16 @@
 		"@typescript-eslint/eslint-plugin": "^5.29.0",
 		"@typescript-eslint/parser": "^5.29.0",
 		"@vscode/test-electron": "^2.1.4",
+    	"@types/lodash": "^4.14.181",
 		"eslint": "^8.18.0",
 		"glob": "^8.0.3",
 		"mocha": "^10.0.0",
 		"ts-mockito": "^2.6.1",
 		"typescript": "^4.7.4",
 		"vsce": "^2.9.2"
+	},
+	"dependencies": {
+		"lodash": "^4.17.21"
 	},
 	"__metadata": {
 		"id": "4bf06dca-7623-4c24-bebc-086fabf79e93",
