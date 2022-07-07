@@ -47,7 +47,6 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
       }
 
       if (match && match.groups) {
-        // const sectionName = match.groups.section;
         const sectionName = match.groups.sectionName;
         const sectionBody = match.groups.sectionBody;
 
@@ -180,9 +179,8 @@ export class EnvironmentVariablesService implements vscode.HoverProvider {
 
       console.log(`hover message: ${hoverMessage.value}`);
       return [hoverMessage];
-    } else {
-      return null;
     }
+    return null;
   }
 
   public getEnvVarDataForPosition(document: vscode.TextDocument, position: vscode.Position) {
