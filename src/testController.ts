@@ -116,7 +116,7 @@ export function create() {
 
 		let listOfChildren: vscode.TestItem[] = [];
 
-		const testRegex = /(\[testenv):(.*)\]/gm;  // made with https://regex101.com
+		const testRegex = /^(\[testenv):(.*)\]/gm;  // made with https://regex101.com
 		let lines = contents.split('\n');
 
 		for (let lineNo = 0; lineNo < lines.length; lineNo++) {
