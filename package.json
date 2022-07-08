@@ -6,7 +6,7 @@
 		"python",
 		"tox"
 	],
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"license": "MIT",
 	"publisher": "the-compiler",
 	"repository": {
@@ -38,14 +38,14 @@
 		"Other"
 	],
 	"activationEvents": [
-    	"onCommand:workbench.action.tasks.runTask",
+		"onCommand:workbench.action.tasks.runTask",
 		"onCommand:python-tox.select",
 		"onCommand:python-tox.selectWithArgs",
 		"onCommand:python-tox.selectMultiple",
 		"onCommand:python-tox.selectMultipleWithArgs",
 		"onCommand:python-tox.openDocs",
 		"workspaceContains:tox.ini",
-    	"onLanguage:ini"
+		"onLanguage:ini"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
