@@ -7,11 +7,13 @@ import * as fs from 'fs';
 import { EnvironmentVariablesService } from '../../environment_variables_service';
 import { mock, verify, instance, when } from 'ts-mockito';
 import { strict as assert } from 'assert';
-import * as utils from './utils';
+import * as testutils from './testutils';
+import * as utils from '../../utils';
+import * as run from '../../run';
 
 function getExampleToxIniPath(sampleName: string): string {
 	// Build path to tox.ini file.
-	const exampleDir = utils.getExampleDir(sampleName);
+	const exampleDir = testutils.getExampleDir(sampleName);
 	const toxIniPath = path.join(exampleDir, 'tox.ini');
 
 	return toxIniPath;
@@ -55,26 +57,26 @@ suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	test('getting tox environments', async () => {
-		const dir = utils.getExampleDir("simple");
-		const envs = await extension._private.getToxEnvs(dir);
+		const dir = testutils.getExampleDir("simple");
+		const envs = await run.getToxEnvs(dir);
 		assert.deepEqual(envs, ["one", "two"]);
 	});
 
 	test('make sure we have all tox environments', async () => {
-		const dir = utils.getExampleDir("allenvs");
-		const envs = await extension._private.getToxEnvs(dir);
+		const dir = testutils.getExampleDir("allenvs");
+		const envs = await run.getToxEnvs(dir);
 		assert.deepEqual(envs, ["one", "two", "three"]);
 	});
 
 	test('running tox', async () => {
-		const dir = utils.getExampleDir("end2end");
+		const dir = testutils.getExampleDir("end2end");
 
 		const tmpdir = path.join(dir, ".tox", "tmp");
 		const marker = path.join(tmpdir, "tox-did-run");
 		fs.mkdirSync(tmpdir, { recursive: true });
 		fs.rmSync(marker, { force: true });
 
-		await extension._private.runTox(["test"], "", extension._private.getTerminal(dir));
+		await run.runTox(["test"], "", utils.getTerminal(dir));
 		const terminal = await waitForTerminal();
 		assert.equal(terminal.name, "tox");
 
@@ -91,7 +93,7 @@ suite('Extension Test Suite', () => {
 		const envArg = envs.join(",");
 		const terminalCommand = `tox -e ${envArg} ${toxArguments}`;
 		
-		extension._private.runTox(envs, toxArguments, instance(mockedTerminal));
+		run.runTox(envs, toxArguments, instance(mockedTerminal));
 
 		verify(mockedTerminal.show(true)).called();
 		verify(mockedTerminal.sendText(terminalCommand)).called();

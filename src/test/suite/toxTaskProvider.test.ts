@@ -5,7 +5,7 @@ import * as path from 'path';
 // as well as import your extension to test it
 import * as vscode from 'vscode';
 import * as tasks from '../../toxTaskProvider';
-import * as utils from './utils';
+import * as utils from './testutils';
 
 suite('ToxTaskProvider Test Suite', () => {
 
