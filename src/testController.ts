@@ -57,6 +57,11 @@ export function create() {
 			runHandler(false, request, token);
 		}
 	);
+
+	// Check all existing documents
+	for (const document of vscode.workspace.textDocuments) {
+		parseTestsInDocument(document);
+	}
 	
 	// Check for tox.ini files when a new document is opened or saved.
 	vscode.workspace.onDidOpenTextDocument(parseTestsInDocument);
