@@ -13,15 +13,15 @@
 </a>
 
 
-[![VS Marketplace Version](https://vsmarketplacebadge.apphb.com/version/the-compiler.python-tox.svg)](https://marketplace.visualstudio.com/items?itemName=the-compiler.python-tox)
-[![VS Marketplace Installs](https://vsmarketplacebadge.apphb.com/installs/the-compiler.python-tox.svg)](https://marketplace.visualstudio.com/items?itemName=the-compiler.python-tox)
-[![VS Marketplace Ratings](https://vsmarketplacebadge.apphb.com/rating/the-compiler.python-tox.svg)](https://marketplace.visualstudio.com/items?itemName=the-compiler.python-tox)
+[![VS Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/the-compiler.python-tox)](https://marketplace.visualstudio.com/items?itemName=the-compiler.python-tox)
+[![VS Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/the-compiler.python-tox)](https://marketplace.visualstudio.com/items?itemName=the-compiler.python-tox)
+[![VS Marketplace Ratings](https://img.shields.io/visual-studio-marketplace/r/the-compiler.python-tox)](https://marketplace.visualstudio.com/items?itemName=the-compiler.python-tox)
 
 [![Open VSX Version](https://img.shields.io/open-vsx/v/the-compiler/python-tox?color=blue)](https://open-vsx.org/extension/the-compiler/python-tox)
 [![Open VSX Downloads](https://img.shields.io/open-vsx/dt/the-compiler/python-tox?color=blue)](https://open-vsx.org/extension/the-compiler/python-tox)
 [![Open VSX Ratings](https://img.shields.io/open-vsx/rating/the-compiler/python-tox?color=blue)](https://open-vsx.org/extension/the-compiler/python-tox)
 
-[![CI](https://img.shields.io/github/workflow/status/The-Compiler/vscode-python-tox/CI)](https://github.com/The-Compiler/vscode-python-tox/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/The-Compiler/vscode-python-tox/ci.yml?branch=main)](https://github.com/The-Compiler/vscode-python-tox/actions/workflows/ci.yml)
 [![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=pink)](https://github.com/sponsors/The-Compiler/)
 
 This extension integrates the [tox](https://tox.readthedocs.io/) task automation tool with Visual Studio Code.
