@@ -6,7 +6,7 @@
 		"python",
 		"tox"
 	],
-	"version": "1.0.0",
+	"version": "1.0.1-dev",
 	"license": "MIT",
 	"publisher": "the-compiler",
 	"repository": {

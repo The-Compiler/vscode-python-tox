@@ -6,10 +6,10 @@ import { runTox } from './run';
 export function create() {
 	const controller = vscode.tests.createTestController('toxTestController', 'Tox Testing');
 
-	controller.resolveHandler = async (test) => { 
+	controller.resolveHandler = async (test) => {
 		if (!test) {
 			await discoverAllFilesInWorkspace();
-		} 
+		}
 		else {
 			await parseTestsInFileContents(test);
 		}
@@ -18,34 +18,34 @@ export function create() {
 	async function runHandler(
 		shouldDebug: boolean,
 		request: vscode.TestRunRequest,
-		token: vscode.CancellationToken) 
+		token: vscode.CancellationToken)
 	{
 		const run = controller.createTestRun(request);
 		const queue: vscode.TestItem[] = [];
-		
+
 		if (request.include) {
 			request.include.forEach(test => queue.push(test));
 		}
-		
+
 		while (queue.length > 0 && !token.isCancellationRequested) {
 			const test = queue.pop()!;
-		
+
 			// Skip tests the user asked to exclude
 			if (request.exclude?.includes(test)) {
 				continue;
 			}
-			
+
 			const start = Date.now();
 			try {
 				const cwd = vscode.workspace.getWorkspaceFolder(test.uri!)!.uri.path;
 				runTox([test.label], cwd);
 				run.passed(test, Date.now() - start);
-			} 
+			}
 			catch (e: any) {
 				run.failed(test, new vscode.TestMessage(e.message), Date.now() - start);
 			}
 		}
-		
+
 		// Make sure to end the run after all tests have been executed:
 		run.end();
 	}
@@ -62,7 +62,7 @@ export function create() {
 	for (const document of vscode.workspace.textDocuments) {
 		parseTestsInDocument(document);
 	}
-	
+
 	// Check for tox.ini files when a new document is opened or saved.
 	vscode.workspace.onDidOpenTextDocument(parseTestsInDocument);
 	vscode.workspace.onDidSaveTextDocument(parseTestsInDocument);
@@ -80,8 +80,10 @@ export function create() {
 		if (existing) {
 			return existing;
 		}
-	
-		const file = controller.createTestItem(uri.toString(), uri.path.split('/').pop()!, uri);
+
+		let splittedPath = uri.path.split('/');
+		const file = controller.createTestItem(uri.toString(), splittedPath.pop()!, uri);
+		file.description = "(" + splittedPath.pop()! + ")";
 		controller.items.add(file);
 
 		file.canResolveChildren = true;
@@ -121,7 +123,7 @@ export function create() {
 
 		for (let lineNo = 0; lineNo < lines.length; lineNo++) {
 			let line = lines[lineNo];
-    		let regexResult = testRegex.exec(line);
+			let regexResult = testRegex.exec(line);
 			if (!regexResult) {
 				continue;
 			}
@@ -148,12 +150,12 @@ export function create() {
 		if (!vscode.workspace.workspaceFolders) {
 			return []; // handle the case of no open folders
 		}
-		
+
 		return Promise.all(
 			vscode.workspace.workspaceFolders.map(async workspaceFolder => {
 				const pattern = new vscode.RelativePattern(workspaceFolder, 'tox.ini');
 				const watcher = vscode.workspace.createFileSystemWatcher(pattern);
-			
+
 				// When files are created, make sure there's a corresponding "file" node in the tree
 				watcher.onDidCreate(uri => getOrCreateFile(uri));
 				// When files change, re-parse them. Note that you could optimize this so
@@ -162,15 +164,15 @@ export function create() {
 				// And, finally, delete TestItems for removed files. This is simple, since
 				// we use the URI as the TestItem's ID.
 				watcher.onDidDelete(uri => controller.items.delete(uri.toString()));
-			
+
 				for (const file of await vscode.workspace.findFiles(pattern)) {
 					getOrCreateFile(file);
 				}
-			
+
 				return watcher;
 			})
 		);
 	}
 
-    return controller;
+	return controller;
 }

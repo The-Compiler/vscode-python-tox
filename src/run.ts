@@ -15,7 +15,7 @@ export function runTox(envs: string[], toxArguments: string, terminal: vscode.Te
 	const envArg = envs.join(",");
 	terminal.show(true);  // preserve focus
 
-	// FIXME In theory, there's a command injection here, if an environment name
+	// FIXME: In theory, there's a command injection here, if an environment name
 	// contains shell metacharacters. However:
 	// - Escaping the argument in a shell-agnostic way is hard:
 	//   https://github.com/microsoft/vscode/blob/1.57.0/src/vs/workbench/contrib/debug/node/terminals.ts#L84-L211
