@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as util from 'util';
-import { runTox } from './run';
+import { runTox, getToxEnvs } from './run';
 
 export function create() {
 	const controller = vscode.tests.createTestController('toxTestController', 'Tox Testing');
@@ -121,27 +121,51 @@ export function create() {
 		const testRegex = /^(\[testenv):(.*)\]/gm;  // made with https://regex101.com
 		let lines = contents.split('\n');
 
-		for (let lineNo = 0; lineNo < lines.length; lineNo++) {
-			let line = lines[lineNo];
-			let regexResult = testRegex.exec(line);
-			if (!regexResult) {
-				continue;
+		const toxTests = await getToxEnvs(path.dirname(file.uri!.path));
+
+		if (toxTests !== undefined) {
+			for (let lineNo = 0; lineNo < lines.length; lineNo++) {
+				let line = lines[lineNo];
+				let regexResult = testRegex.exec(line);
+				if (!regexResult) {
+					continue;
+				}
+
+				let envName = regexResult[2];
+				if (envName.includes('{')) {
+					//FIXME: Excluding tox permutations for now, maybe just use the last permutation line to add all leftover toxTests?
+					continue;
+				}
+
+				for (let testNo = 0; testNo < toxTests.length; testNo++) {
+					let toxTest = toxTests[testNo];
+
+					if (toxTest === envName) {
+						const newTestItem = controller.createTestItem(envName, envName, file.uri);
+						newTestItem.range = new vscode.Range(
+							new vscode.Position(lineNo, 0),
+							new vscode.Position(lineNo, regexResult[0].length)
+						);
+						listOfChildren.push(newTestItem);
+						//remove the toxTest for which a match was found with the regex
+						toxTests.splice(testNo,1);
+						//no need to go further through the list of toxTests if we found the respective lineNo
+						break;
+					}
+				}
 			}
 
-			let envName = regexResult[2];
-			if (envName.includes('{')) {
-				// Excluding tox permutations for now
-				continue;
+			//add the remaining of the toxTests (that potentially are part of permutations)
+			for (let toxTest of toxTests) {
+				const newTestItem = controller.createTestItem(toxTest, toxTest, file.uri);
+				newTestItem.range = new vscode.Range(
+					new vscode.Position(0, 0), // ... to the beginning of the document
+					new vscode.Position(0, 0)
+				);
+				listOfChildren.push(newTestItem);
 			}
-
-			const newTestItem = controller.createTestItem(envName, envName, file.uri);
-			newTestItem.range = new vscode.Range(
-				new vscode.Position(lineNo, 0),
-				new vscode.Position(lineNo, regexResult[0].length)
-			);
-
-			listOfChildren.push(newTestItem);
 		}
+		//FIXME: empty tox.ini produces a single test at line 0 with env name 'python' (tox -a lists this test!)???
 
 		return listOfChildren;
 	}

@@ -106,7 +106,7 @@ async function getToxTestTasks(): Promise<vscode.Task[]> {
                 task.group = inferTaskGroup(toxTestenv.toLowerCase());
                 result.push(task);
             }
-        }    
+        }
     }
     return result;
 }
