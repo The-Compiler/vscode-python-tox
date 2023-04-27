@@ -4,7 +4,8 @@ import * as fs from 'fs';
 import * as child_process from 'child_process';
 import * as vscode from 'vscode';
 import * as util from 'util';
-
+import * as os from 'os';
+import { commandToxListAllEnvs, commandToxRun } from './run';
 
 const exec = util.promisify(child_process.exec);
 
@@ -37,7 +38,7 @@ export class ToxTaskProvider implements vscode.TaskProvider {
                 _task.scope ?? vscode.TaskScope.Workspace,
                 definition.testenv,
                 ToxTaskProvider.toxType,
-                new vscode.ShellExecution(`tox -e ${definition.testenv}`)
+                new vscode.ShellExecution(`${commandToxRun} ${definition.testenv}`)
             );
         }
         return undefined;
@@ -90,16 +91,15 @@ async function getToxTestenvs(): Promise<vscode.Task[]> {
             continue;
         }
 
-        const commandLine = 'tox -a';
         try {
-            const { stdout, stderr } = await exec(commandLine, { cwd: folderString });
+            const { stdout, stderr } = await exec(commandToxListAllEnvs, { cwd: folderString });
             if (stderr && stderr.length > 0) {
                 const channel = getOutputChannel();
                 channel.appendLine(stderr);
                 channel.show(true);
             }
             if (stdout) {
-                const lines = stdout.split(/\r?\n/);
+                const lines = stdout.trim().split(os.EOL);
                 for (const line of lines) {
                     if (line.length === 0) {
                         continue;
@@ -115,7 +115,7 @@ async function getToxTestenvs(): Promise<vscode.Task[]> {
                         workspaceFolder,
                         toxTestenv,
                         ToxTaskProvider.toxType,
-                        new vscode.ShellExecution(`tox -e ${toxTestenv}`)
+                        new vscode.ShellExecution(`${commandToxRun} ${toxTestenv}`)
                     );
                     task.group = inferTaskGroup(line.toLowerCase());
                     result.push(task);
