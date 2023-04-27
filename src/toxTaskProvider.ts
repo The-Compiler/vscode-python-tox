@@ -4,8 +4,7 @@ import * as fs from 'fs';
 import * as child_process from 'child_process';
 import * as vscode from 'vscode';
 import * as util from 'util';
-import * as os from 'os';
-import { commandToxListAllEnvs, commandToxRun } from './run';
+import { getToxEnvs, commandToxRun } from './run';
 
 const exec = util.promisify(child_process.exec);
 
@@ -24,7 +23,7 @@ export class ToxTaskProvider implements vscode.TaskProvider {
 
     public provideTasks(): Thenable<vscode.Task[]> | undefined {
         if (!this.toxPromise) {
-            this.toxPromise = getToxTestenvs();
+            this.toxPromise = getToxTestTasks();
         }
         return this.toxPromise;
     }
@@ -43,14 +42,6 @@ export class ToxTaskProvider implements vscode.TaskProvider {
         }
         return undefined;
     }
-}
-
-let _channel: vscode.OutputChannel;
-function getOutputChannel(): vscode.OutputChannel {
-    if (!_channel) {
-        _channel = vscode.window.createOutputChannel('Tox Auto Detection');
-    }
-    return _channel;
 }
 
 interface ToxTaskDefinition extends vscode.TaskDefinition {
@@ -72,7 +63,7 @@ function inferTaskGroup(taskName: string): vscode.TaskGroup | undefined {
     }
 }
 
-async function getToxTestenvs(): Promise<vscode.Task[]> {
+async function getToxTestTasks(): Promise<vscode.Task[]> {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     const result: vscode.Task[] = [];
 
@@ -91,47 +82,31 @@ async function getToxTestenvs(): Promise<vscode.Task[]> {
             continue;
         }
 
-        try {
-            const { stdout, stderr } = await exec(commandToxListAllEnvs, { cwd: folderString });
-            if (stderr && stderr.length > 0) {
-                const channel = getOutputChannel();
-                channel.appendLine(stderr);
-                channel.show(true);
-            }
-            if (stdout) {
-                const lines = stdout.trim().split(os.EOL);
-                for (const line of lines) {
-                    if (line.length === 0) {
-                        continue;
-                    }
-                    const toxTestenv = line;
-                    const kind: ToxTaskDefinition = {
-                        type: ToxTaskProvider.toxType,
-                        testenv: toxTestenv
-                    };
+        const toxTestenvs = await getToxEnvs(folderString);
 
-                    const task = new vscode.Task(
-                        kind,
-                        workspaceFolder,
-                        toxTestenv,
-                        ToxTaskProvider.toxType,
-                        new vscode.ShellExecution(`${commandToxRun} ${toxTestenv}`)
-                    );
-                    task.group = inferTaskGroup(line.toLowerCase());
-                    result.push(task);
+        if (toxTestenvs !== undefined) {
+            for (const toxTestenv of toxTestenvs) {
+
+                if (toxTestenv.length === 0) {
+                    continue;
                 }
+
+                const kind: ToxTaskDefinition = {
+                    type: ToxTaskProvider.toxType,
+                    testenv: toxTestenv
+                };
+
+                const task = new vscode.Task(
+                    kind,
+                    workspaceFolder,
+                    toxTestenv,
+                    ToxTaskProvider.toxType,
+                    new vscode.ShellExecution(`${commandToxRun} ${toxTestenv}`)
+                );
+                task.group = inferTaskGroup(toxTestenv.toLowerCase());
+                result.push(task);
             }
-        } catch (err: any) {
-            const channel = getOutputChannel();
-            if (err.stderr) {
-                channel.appendLine(err.stderr);
-            }
-            if (err.stdout) {
-                channel.appendLine(err.stdout);
-            }
-            channel.appendLine('Auto detecting tox testenvs failed.');
-            channel.show(true);
-        }
+        }    
     }
     return result;
 }

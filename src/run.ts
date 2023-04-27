@@ -9,8 +9,29 @@ const exec = util.promisify(child_process.exec);
 export const commandToxListAllEnvs = 'tox -a';
 
 export async function getToxEnvs(projDir: string) {
-	const { stdout } = await exec(commandToxListAllEnvs, { cwd: projDir });
-	return stdout.trim().split(os.EOL);
+	try {
+		const { stdout, stderr } = await exec(commandToxListAllEnvs, { cwd: projDir });
+		if (stderr && stderr.length > 0) {
+			const channel = getOutputChannel();
+			channel.appendLine(stderr);
+			channel.show(true);
+		}
+		if (stdout) {
+			return stdout.trim().split(os.EOL);
+		}
+	} catch (err: any) {
+		const channel = getOutputChannel();
+		if (err.stderr) {
+			channel.appendLine(err.stderr);
+		}
+		if (err.stdout) {
+			channel.appendLine(err.stdout);
+		}
+		channel.appendLine('Auto detecting tox testenvs failed.');
+		channel.show(true);
+	}
+
+	return undefined;
 }
 
 export const commandToxRun = 'tox -e';
@@ -33,4 +54,12 @@ export function runTox(envs: string[], toxArguments: string, terminal: vscode.Te
 	//   properly at all.
 	let terminalCommand = `${commandToxRun} ${envArg} ${toxArguments}`;
 	terminal.sendText(terminalCommand);
+}
+
+let _channel: vscode.OutputChannel;
+function getOutputChannel(): vscode.OutputChannel {
+	if (!_channel) {
+		_channel = vscode.window.createOutputChannel('Tox Auto Detection');
+	}
+	return _channel;
 }
