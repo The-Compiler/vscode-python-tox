@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as util from 'util';
 import { runTox, getToxEnvs } from './run';
+import { getTerminal, getRootParentLabelDesc } from './utils';
 
 export function create() {
 	const controller = vscode.tests.createTestController('toxTestController', 'Tox Testing');
@@ -38,7 +39,7 @@ export function create() {
 			const start = Date.now();
 			try {
 				const cwd = vscode.workspace.getWorkspaceFolder(test.uri!)!.uri.path;
-				runTox([test.label], cwd);
+				runTox([test.label], "", getTerminal(cwd, getRootParentLabelDesc(test)));
 				run.passed(test, Date.now() - start);
 			}
 			catch (e: any) {
