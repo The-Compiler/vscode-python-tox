@@ -1,15 +1,16 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as util from 'util';
-import { runTox } from './run';
+import { runTox, getToxEnvs } from './run';
+import { getTerminal, getRootParentLabelDesc } from './utils';
 
 export function create() {
 	const controller = vscode.tests.createTestController('toxTestController', 'Tox Testing');
 
-	controller.resolveHandler = async (test) => { 
+	controller.resolveHandler = async (test) => {
 		if (!test) {
 			await discoverAllFilesInWorkspace();
-		} 
+		}
 		else {
 			await parseTestsInFileContents(test);
 		}
@@ -18,34 +19,34 @@ export function create() {
 	async function runHandler(
 		shouldDebug: boolean,
 		request: vscode.TestRunRequest,
-		token: vscode.CancellationToken) 
+		token: vscode.CancellationToken)
 	{
 		const run = controller.createTestRun(request);
 		const queue: vscode.TestItem[] = [];
-		
+
 		if (request.include) {
 			request.include.forEach(test => queue.push(test));
 		}
-		
+
 		while (queue.length > 0 && !token.isCancellationRequested) {
 			const test = queue.pop()!;
-		
+
 			// Skip tests the user asked to exclude
 			if (request.exclude?.includes(test)) {
 				continue;
 			}
-			
+
 			const start = Date.now();
 			try {
 				const cwd = vscode.workspace.getWorkspaceFolder(test.uri!)!.uri.path;
-				runTox([test.label], cwd);
+				runTox([test.label], "", getTerminal(cwd, getRootParentLabelDesc(test)));
 				run.passed(test, Date.now() - start);
-			} 
+			}
 			catch (e: any) {
 				run.failed(test, new vscode.TestMessage(e.message), Date.now() - start);
 			}
 		}
-		
+
 		// Make sure to end the run after all tests have been executed:
 		run.end();
 	}
@@ -62,7 +63,7 @@ export function create() {
 	for (const document of vscode.workspace.textDocuments) {
 		parseTestsInDocument(document);
 	}
-	
+
 	// Check for tox.ini files when a new document is opened or saved.
 	vscode.workspace.onDidOpenTextDocument(parseTestsInDocument);
 	vscode.workspace.onDidSaveTextDocument(parseTestsInDocument);
@@ -80,8 +81,10 @@ export function create() {
 		if (existing) {
 			return existing;
 		}
-	
-		const file = controller.createTestItem(uri.toString(), uri.path.split('/').pop()!, uri);
+
+		let splittedPath = uri.path.split('/');
+		const file = controller.createTestItem(uri.toString(), splittedPath.pop()!, uri);
+		file.description = "(" + splittedPath.pop()! + ")";
 		controller.items.add(file);
 
 		file.canResolveChildren = true;
@@ -119,27 +122,51 @@ export function create() {
 		const testRegex = /^(\[testenv):(.*)\]/gm;  // made with https://regex101.com
 		let lines = contents.split('\n');
 
-		for (let lineNo = 0; lineNo < lines.length; lineNo++) {
-			let line = lines[lineNo];
-    		let regexResult = testRegex.exec(line);
-			if (!regexResult) {
-				continue;
+		const toxTests = await getToxEnvs(path.dirname(file.uri!.path));
+
+		if (toxTests !== undefined) {
+			for (let lineNo = 0; lineNo < lines.length; lineNo++) {
+				let line = lines[lineNo];
+				let regexResult = testRegex.exec(line);
+				if (!regexResult) {
+					continue;
+				}
+
+				let envName = regexResult[2];
+				if (envName.includes('{')) {
+					//FIXME: Excluding tox permutations for now, maybe just use the last permutation line to add all leftover toxTests?
+					continue;
+				}
+
+				for (let testNo = 0; testNo < toxTests.length; testNo++) {
+					let toxTest = toxTests[testNo];
+
+					if (toxTest === envName) {
+						const newTestItem = controller.createTestItem(envName, envName, file.uri);
+						newTestItem.range = new vscode.Range(
+							new vscode.Position(lineNo, 0),
+							new vscode.Position(lineNo, regexResult[0].length)
+						);
+						listOfChildren.push(newTestItem);
+						//remove the toxTest for which a match was found with the regex
+						toxTests.splice(testNo,1);
+						//no need to go further through the list of toxTests if we found the respective lineNo
+						break;
+					}
+				}
 			}
 
-			let envName = regexResult[2];
-			if (envName.includes('{')) {
-				// Excluding tox permutations for now
-				continue;
+			//add the remaining of the toxTests (that potentially are part of permutations)
+			for (let toxTest of toxTests) {
+				const newTestItem = controller.createTestItem(toxTest, toxTest, file.uri);
+				newTestItem.range = new vscode.Range(
+					new vscode.Position(0, 0), // ... to the beginning of the document
+					new vscode.Position(0, 0)
+				);
+				listOfChildren.push(newTestItem);
 			}
-
-			const newTestItem = controller.createTestItem(envName, envName, file.uri);
-			newTestItem.range = new vscode.Range(
-				new vscode.Position(lineNo, 0),
-				new vscode.Position(lineNo, regexResult[0].length)
-			);
-
-			listOfChildren.push(newTestItem);
 		}
+		//FIXME: empty tox.ini produces a single test at line 0 with env name 'python' (tox -a lists this test!)???
 
 		return listOfChildren;
 	}
@@ -148,12 +175,12 @@ export function create() {
 		if (!vscode.workspace.workspaceFolders) {
 			return []; // handle the case of no open folders
 		}
-		
+
 		return Promise.all(
 			vscode.workspace.workspaceFolders.map(async workspaceFolder => {
 				const pattern = new vscode.RelativePattern(workspaceFolder, 'tox.ini');
 				const watcher = vscode.workspace.createFileSystemWatcher(pattern);
-			
+
 				// When files are created, make sure there's a corresponding "file" node in the tree
 				watcher.onDidCreate(uri => getOrCreateFile(uri));
 				// When files change, re-parse them. Note that you could optimize this so
@@ -162,15 +189,15 @@ export function create() {
 				// And, finally, delete TestItems for removed files. This is simple, since
 				// we use the URI as the TestItem's ID.
 				watcher.onDidDelete(uri => controller.items.delete(uri.toString()));
-			
+
 				for (const file of await vscode.workspace.findFiles(pattern)) {
 					getOrCreateFile(file);
 				}
-			
+
 				return watcher;
 			})
 		);
 	}
 
-    return controller;
+	return controller;
 }

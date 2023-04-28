@@ -34,3 +34,18 @@ export function getTerminal(projDir : string = findProjectDir(), name : string =
 	}
 	return vscode.window.createTerminal({"cwd": projDir, "name": name});
 }
+
+/**
+ * Get the top-most parent label (+ description) for terminal name
+ * @param test The test to start from.
+ * @returns The label and description of the root test item.
+ */
+export function getRootParentLabelDesc(test: vscode.TestItem) : string {
+	let root = test;
+
+	while (root.parent !== undefined){
+		root = root.parent;
+	}
+
+	return root.label + " " + root.description; // FIXME: return as tuple?
+}
